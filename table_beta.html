@@ -23,6 +23,7 @@
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
     <script type="text/javascript">
 
         function betaStatParam(m, std)
@@ -30,7 +31,6 @@
             m = parseFloat(m);
             var v = parseFloat(std);
             v = v * v;
-            document.getElementById("holder").innerHTML = m;
             var a = ((1 - m) / v - 1 / m) * m * m;
             var b = a * (1 / m - 1)
             return [a, b]
@@ -152,6 +152,39 @@
             document.getElementById("results").scrollIntoView();
         }
 
+        function plotBeta()
+        {
+            var a0 = parseFloat(document.getElementById("a0").value);
+            var a1 = parseFloat(document.getElementById("a1").value);
+            var b0 = parseFloat(document.getElementById("b0").value);
+            var b1 = parseFloat(document.getElementById("b1").value);
+
+            x = []
+            y = []
+            for (i = 0.0; i <= 1.0; i = i + 0.01) x.push(i)
+            for (i = 0; i < x.length; i++) y.push(jStat.beta.pdf(x[i], a0, b0))
+            console.log(jStat.beta.pdf(0.5, 2, 2));
+            var ctrl = {
+            x: x,
+            y: y,
+            type: 'scatter',
+            name: 'Control sample'
+            };
+
+            y = []
+            for (i = 0; i < x.length; i++) y.push(jStat.beta.pdf(x[i], a1, b1))
+
+            var exp = {
+            x: x,
+            y: y,
+            type: 'scatter',
+            name: 'Experimental sample'
+            };
+            var data = [ctrl, exp];
+
+            Plotly.newPlot('plot', data)
+        }
+
         function init()
         {
             document.getElementById("M0_min").value = 5;
@@ -168,6 +201,8 @@
             document.getElementById("beta").value = 0.1;
             execBetaParamStat(0); 
             execBetaParamStat(1);
+
+            plotBeta();
         }
   </script>
 </head>     
@@ -189,20 +224,20 @@
             <h4>Mean and variance</h4>
             <div class="block">
                 <label for="mean0">Mean</label>
-                <input type="number" id="mean0" value="" step="0.1" onchange="execBetaStatParam(0)">
+                <input type="number" id="mean0" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam(0); plotBeta();">
             </div>
             <div class="block">
                 <label for="">Std</label>
-                <input type="number" id="std0" value="" step="0.1" onchange="execBetaStatParam(0)">
+                <input type="number" id="std0" value="" step="0.01" min="0.001" onchange="execBetaStatParam(0); plotBeta();">
             </div>
             <h4>a and b</h4>
             <div class="block">
                 <label for="">a0</label>
-                <input type="number" id="a0" value="" step="1" onchange="execBetaParamStat(0)">
+                <input type="number" id="a0" value="" step="1" min="1" onchange="execBetaParamStat(0); plotBeta();">
             </div>
             <div class="block">
                 <label for="">b0</label>
-                <input type="number" id="b0" value="" step="1" onchange="execBetaParamStat(0)">
+                <input type="number" id="b0" value="" step="1" min="1" onchange="execBetaParamStat(0); plotBeta();">
             </div>
         </div>
 
@@ -220,23 +255,27 @@
             <h4>Mean and variance</h4>
             <div class="block">
                 <label for="mean1">Mean</label>
-                <input type="number" id="mean1" value="" step="0.1" onchange="execBetaStatParam(1)">
+                <input type="number" id="mean1" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam(1); plotBeta();">
             </div>
             <div class="block">
                 <label for="">Std</label>
-                <input type="number" id="std1" value="" step="0.1" onchange="execBetaStatParam(1)">
+                <input type="number" id="std1" value="" step="0.01" min="0.001" onchange="execBetaStatParam(1); plotBeta();">
             </div>
             <h4>a and b</h4>
             <div class="block">
                 <label for="">a0</label>
-                <input type="number" id="a1" value="" step="1" onchange="execBetaParamStat(1)">
+                <input type="number" id="a1" value="" step="1" min="1" onchange="execBetaParamStat(1); plotBeta();">
             </div>
             <div class="block">
                 <label for="">b0</label>
-                <input type="number" id="b1" value="" step="1" onchange="execBetaParamStat(1)">
+                <input type="number" id="b1" value="" step="1" min="1" onchange="execBetaParamStat(1); plotBeta();">
             </div>
         </div>
     </div>
+    <div class="row">
+        <div id='plot'><!-- Plotly chart will be drawn inside this DIV --></div>
+    </div>
+
     <div class="row">
         <div class="column">
             <h2>Parameters for t-test</h2>
@@ -251,7 +290,7 @@
                 </div>
             </div>
 
-            <input type="button" id="create" value="Calculate beta" onclick="execCalcBeta();"/>
+            <input type="button" id="create" value="Calculate beta" onclick="execCalcBeta(); "/>
         </div>
     </div>
 

@@ -148,6 +148,8 @@
             output2 = output2 + "</table>";
             document.getElementById("one_sided").innerHTML = output1;
             document.getElementById("two_sided").innerHTML = output2;
+
+            document.getElementById("results").scrollIntoView();
         }
 
         function init()
@@ -253,7 +255,7 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" id="results">
         <div class="column">
             <h2>Result</h2>
             False negative rates. Lower is better. Each row correponds to a fixed number of control samples.

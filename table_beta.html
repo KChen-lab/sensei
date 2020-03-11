@@ -263,11 +263,11 @@
             </div>
             <h4>a and b</h4>
             <div class="block">
-                <label for="">a0</label>
+                <label for="">a1</label>
                 <input type="number" id="a1" value="" step="1" min="1" onchange="execBetaParamStat(1); plotBeta();">
             </div>
             <div class="block">
-                <label for="">b0</label>
+                <label for="">b1</label>
                 <input type="number" id="b1" value="" step="1" min="1" onchange="execBetaParamStat(1); plotBeta();">
             </div>
         </div>
@@ -285,12 +285,12 @@
                     <input type="number" id="alpha" value="">
                 </div>
                 <div class="block">
-                    <label for="beta">False negative rate β</label>
+                    <label for="beta">False negative threshold Thβ</label>
                     <input type="number" id="beta" value="">
                 </div>
             </div>
 
-            <input type="button" id="create" value="Calculate beta" onclick="execCalcBeta(); "/>
+            <input type="button" id="create" value="Calculate beta table" onclick="execCalcBeta(); "/>
         </div>
     </div>
 
@@ -298,7 +298,7 @@
         <div class="column">
             <h2>Result</h2>
             False negative rates. Lower is better. Each row correponds to a fixed number of control samples.
-            Each row correponds to a fixed number of experimental samples.
+            Each row correponds to a fixed number of experimental samples. Values pass Thβ are colored in gray.
             <div>
                 <h2>One-sided</h2>
                 <div id="one_sided">

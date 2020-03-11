@@ -1,0 +1,229 @@
+<html>
+<head>
+  <title>Table</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    label {
+        display: inline-block;
+        width: 150px;
+        text-align: left;
+    }​
+
+    .row {
+      display: flex;
+    }
+
+    /* Create two equal columns that sits next to each other */
+    .column {
+      flex: 50%;
+      padding: 10px;
+      height: 300px; /* Should be removed. Only for demonstration */
+    }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    <script type="text/javascript">
+
+        function createTable()
+        {
+      var M0 = document.getElementById('N0').value;
+      var M1 = document.getElementById('N1').value;
+      var j=1;
+      var output = "<table border='1' width='500' cellspacing='0'cellpadding='5'>";
+      for(i=1;i<=M0;i++)
+      {
+    	output = output + "<tr>";
+        while(j<=M1)
+        {
+  		  output = output + "<td>" + i*j + "</td>";
+   		  j = j+1;
+   		}
+   		 output = output + "</tr>";
+   		 j = 1;
+    }
+        output = output + "</table>";
+        document.getElementById("holder").innerHTML = output;
+        }
+
+        function betaStatParam(m, std)
+        {
+            m = parseFloat(m);
+            var v = parseFloat(std);
+            v = v * v;
+            document.getElementById("holder").innerHTML = m;
+            var a = ((1 - m) / v - 1 / m) * m * m;
+            var b = a * (1 / m - 1)
+            return [a, b]
+        }
+
+        function betaParamStat(a, b)
+        {
+            a = parseFloat(a);
+            b = parseFloat(b);
+            var m = a / (a + b);
+            var v = a * b / Math.pow(a + b, 2) / (a + b + 1);
+            return [m, Math.sqrt(v)];
+            
+        }
+
+        function execBetaParamStat(suffix)
+        {
+            var temp = betaParamStat(document.getElementById("a".concat(suffix)).value, document.getElementById("b".concat(suffix)).value);
+            document.getElementById("mean".concat(suffix)).value = round(temp[0], 5);
+            document.getElementById("std".concat(suffix)).value = round(temp[1], 5);
+        }
+
+        function execBetaStatParam(suffix)
+        {
+            var temp = betaStatParam(document.getElementById("mean".concat(suffix)).value, document.getElementById("std".concat(suffix)).value);
+            document.getElementById("a".concat(suffix)).value = round(temp[0], 5);
+            document.getElementById("b".concat(suffix)).value = round(temp[1], 5);
+        }
+
+        function calcBeta(M0, M1, N0, N1, a0, a1, b0, b1, alpha)
+        {
+            N0 = parseFloat(N0);
+            N1 = parseFloat(N1);
+            M0 = parseFloat(M0);
+            M1 = parseFloat(M1);
+            a0 = parseFloat(a0);
+            a1 = parseFloat(a1);
+            b0 = parseFloat(b0);
+            b1 = parseFloat(b1);
+            alpha = parseFloat(alpha);
+            
+            Ep0 = a0 / (a0 + b0);
+            Ep1 = a1 / (a1 + b1);
+            
+            Vp0 = a0 * b0 * (a0 + b0 + N0) / ((M0 * N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
+            Vp1 = a1 * b1 * (a1 + b1 + N1) / ((M1 * N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
+
+            S = Math.sqrt((((M0 - 1) * Vp0) + ((M1 - 1) * Vp1)) / (M0 + M1 - 2));
+
+            Et = Math.abs(Ep1 - Ep0) / S / Math.sqrt(1 / M0 + 1 / M1);
+
+            t_star1 = jStat.studentt.inv(1 - alpha, M0 + M1 - 2);
+            t_star2 = jStat.studentt.inv(1 - alpha / 2, M0 + M1 - 2);
+
+            return [jStat.normal.cdf(t_star1 - Et, 0, 1), jStat.normal.cdf(t_star2 - Et, 0, 1)]
+        }
+
+        function round(x, p) {return Math.round(x * Math.pow(10, p)) / Math.pow(10, p)}
+
+        function execCalcBeta()
+        {
+            var temp = calcBeta(document.getElementById("M0").value, 
+                                document.getElementById("M1").value, 
+                                document.getElementById("N0").value, 
+                                document.getElementById("N1").value, 
+                                document.getElementById("a0").value, 
+                                document.getElementById("a1").value, 
+                                document.getElementById("b0").value, 
+                                document.getElementById("b1").value, 
+                                document.getElementById("alpha").value)
+            
+            document.getElementById("beta1").value = round(temp[0], 5);
+            document.getElementById("beta2").value = round(temp[1], 5);
+        }
+  </script>
+</head>     
+<body>
+    <div>
+        <h2>Parameters for control sample beta(a, b)</h2>
+        <div>
+            <div>
+                <div class="block">
+                    <label for="M0">Number of samples M0</label>
+                    <input type="number" id="M0" value="5">
+                </div>
+            <div class="block">
+                <label for="N0">Number of cells N0</label>
+                <input type="number" id="N0" value="1000">
+            </div>
+            <h3>Beta distribution</h3>
+            <h4>Mean and variance</h4>
+            <div class="block">
+                <label for="mean0">Mean</label>
+                <input type="number" id="mean0" value="0.44444" step="0.1" onchange="execBetaStatParam(0)">
+            </div>
+            <div class="block">
+                <label for="">Std</label>
+                <input type="number" id="std0" value="0.114" step="0.1" onchange="execBetaStatParam(0)">
+            </div>
+            <h4>a and b</h4>
+            <div class="block">
+                <label for="">a0</label>
+                <input type="number" id="a0" value="8" step="1" onchange="execBetaParamStat(0)">
+            </div>
+            <div class="block">
+                <label for="">b0</label>
+                <input type="number" id="b0" value="10" step="1" onchange="execBetaParamStat(0)">
+            </div>
+        </div>
+
+        <h2>Parameters for experimental sample beta(a, b)</h2>
+        <div>
+            <div class="block">
+                <label for="M1">Number of samples M1</label>
+                <input type="number" id="M1" value="5">
+            </div>
+            <div class="block">
+                <label for="N1">Number of cells N1</label>
+                <input type="number" id="N1" value="1000">
+            </div>
+            <h3>Beta distribution</h3>
+            <h4>Mean and variance</h4>
+            <div class="block">
+                <label for="mean1">Mean</label>
+                <input type="number" id="mean1" value="0.55556" step="0.1" onchange="execBetaStatParam(1)">
+            </div>
+            <div class="block">
+                <label for="">Std</label>
+                <input type="number" id="std1" value="0.114" step="0.1" onchange="execBetaStatParam(1)">
+            </div>
+            <h4>a and b</h4>
+            <div class="block">
+                <label for="">a0</label>
+                <input type="number" id="a1" value="10" step="1" onchange="execBetaParamStat(1)">
+            </div>
+            <div class="block">
+                <label for="">b0</label>
+                <input type="number" id="b1" value="8" step="1" onchange="execBetaParamStat(1)">
+            </div>
+        </div>
+
+        <h2>False positive rate α</h2>
+        <div>
+            <div class="block">
+                <label for="alpha">False positive rate α</label>
+                <input type="number" id="alpha" value="0.05">
+            </div>
+        </div>
+
+        <input type="button" id="create" value="Calculate beta" onclick="execCalcBeta();"/>
+
+
+    </div>
+    <div>
+        <h2>Result</h2>
+        <h3>One-sided</h3>
+        <div>
+            <div class="block">
+                <label for="beta1">False negative rate β</label>
+                <input type="number" id="beta1" value="">
+            </div>
+        </div>
+        <h3>Two-sided</h3>
+        <div>
+            <div class="block">
+                <label for="beta2">False negative rate β</label>
+                <input type="number" id="beta2" value="">
+            </div>
+        </div>
+        <div id="holder"> debug </div>
+    </div>
+</body>
+</html>

@@ -1,52 +1,29 @@
 <html>
 <head>
-  <title>Beta table for multiple sample sizes</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <title>Beta for a single sample size</title>
+    <style>
+        * {
+        box-sizing: border-box;
+        }
 
-    label {
-        display: inline-block;
-        width: 150px;
-        text-align: left;
-    }​
+        .row {
+        display: flex;
+        }
 
-    .row {
-      display: flex;
-    }
-
-    /* Create two equal columns that sits next to each other */
-    .column {
-      flex: 50%;
-      padding: 10px;
-      height: 300px; /* Should be removed. Only for demonstration */
-    }
+        .column {
+        flex: 50%;
+        padding: 10px;
+        }
+        
+        label {
+            display: inline-block;
+            width: 150px;
+            text-align: left;
+        }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
     <script type="text/javascript">
-
-        function createTable()
-        {
-      var M0 = document.getElementById('N0').value;
-      var M1 = document.getElementById('N1').value;
-      var j=1;
-      var output = "<table border='1' width='500' cellspacing='0'cellpadding='5'>";
-      for(i=1;i<=M0;i++)
-      {
-    	output = output + "<tr>";
-        while(j<=M1)
-        {
-  		  output = output + "<td>" + i*j + "</td>";
-   		  j = j+1;
-   		}
-   		 output = output + "</tr>";
-   		 j = 1;
-    }
-        output = output + "</table>";
-        document.getElementById("holder").innerHTML = output;
-        }
 
         function betaStatParam(m, std)
         {
@@ -98,8 +75,8 @@
             Ep0 = a0 / (a0 + b0);
             Ep1 = a1 / (a1 + b1);
             
-            Vp0 = a0 * b0 * (a0 + b0 + N0) / ((M0 * N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
-            Vp1 = a1 * b1 * (a1 + b1 + N1) / ((M1 * N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
+            Vp0 = a0 * b0 * (a0 + b0 + N0) / ((N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
+            Vp1 = a1 * b1 * (a1 + b1 + N1) / ((N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
 
             S = Math.sqrt((((M0 - 1) * Vp0) + ((M1 - 1) * Vp1)) / (M0 + M1 - 2));
 
@@ -115,116 +92,212 @@
 
         function execCalcBeta()
         {
-            var temp = calcBeta(document.getElementById("M0").value, 
-                                document.getElementById("M1").value, 
-                                document.getElementById("N0").value, 
-                                document.getElementById("N1").value, 
-                                document.getElementById("a0").value, 
-                                document.getElementById("a1").value, 
-                                document.getElementById("b0").value, 
-                                document.getElementById("b1").value, 
-                                document.getElementById("alpha").value)
-            
-            document.getElementById("beta1").value = round(temp[0], 5);
-            document.getElementById("beta2").value = round(temp[1], 5);
+            var M0_min = parseFloat(document.getElementById("M0_min").value);
+            var M0_max = parseFloat(document.getElementById("M0_max").value);
+
+            var M1_min = parseFloat(document.getElementById("M1_min").value); 
+            var M1_max = parseFloat(document.getElementById("M1_max").value);
+
+            var N0 = document.getElementById("N0").value;
+            var N1 = document.getElementById("N1").value;
+            var a0 = document.getElementById("a0").value;
+            var a1 = document.getElementById("a1").value;
+            var b0 = document.getElementById("b0").value;
+            var b1 = document.getElementById("b1").value;
+            var alpha = document.getElementById("alpha").value;
+
+            var beta = parseFloat(document.getElementById("beta").value);
+
+            var output1 = "<table border='1' width='500' cellspacing='0'cellpadding='5'>";
+            var output2 = "<table border='1' width='500' cellspacing='0'cellpadding='5'>";
+
+            output1 = output1 + "<tr>";
+            output2 = output2 + "<tr>";
+
+            output1 = output1 + "<td>" + "ctrl\\exp" + "</td>";
+            output2 = output2 + "<td>" + "ctrl\\exp" + "</td>";
+
+            for (j = M1_min; j <= M1_max; j++)
+            {
+                output1 = output1 + "<td>" + j + "</td>";
+                output2 = output2 + "<td>" + j + "</td>";
+            }
+            output1 = output1 + "</tr>";
+            output2 = output2 + "</tr>";
+
+            for(i = M0_min; i <= M0_max; i++)
+            {
+                output1 = output1 + "<tr>";
+                output2 = output2 + "<tr>";
+
+                output1 = output1 + "<td>" + i + "</td>";
+                output2 = output2 + "<td>" + i + "</td>";
+
+                for (j = M1_min; j <= M1_max; j++)
+                {   
+                    var temp = calcBeta(i, j, N0, N1, a0, a1, b0, b1, alpha)
+                    if (temp[0] < beta) output1 = output1 + "<td bgcolor=#E0E0E0>" + round(temp[0], 3) + "</td>";
+                    else output1 = output1 + "<td>" + round(temp[0], 3) + "</td>";
+                    if (temp[1] < beta) output2 = output2 + "<td bgcolor=#E0E0E0>" + round(temp[1], 3) + "</td>";
+                    else output2 = output2 + "<td>" + round(temp[1], 3) + "</td>";
+                }
+                output1 = output1 + "</tr>";
+                output2 = output2 + "</tr>";
+            }
+            output1 = output1 + "</table>";
+            output2 = output2 + "</table>";
+            document.getElementById("one_sided").innerHTML = output1;
+            document.getElementById("two_sided").innerHTML = output2;
+        }
+
+        function init()
+        {
+            document.getElementById("M0_min").value = 5;
+            document.getElementById("M1_min").value = 5;
+            document.getElementById("M0_max").value = 12;
+            document.getElementById("M1_max").value = 12;
+            document.getElementById("N0").value = 1000;
+            document.getElementById("N1").value = 1000;
+            document.getElementById("a0").value = 7;
+            document.getElementById("a1").value = 10;
+            document.getElementById("b0").value = 10;
+            document.getElementById("b1").value = 7;
+            document.getElementById("alpha").value = 0.05;
+            document.getElementById("beta").value = 0.1;
+            execBetaParamStat(0); 
+            execBetaParamStat(1);
         }
   </script>
 </head>     
 <body>
-    <h1>NOT YET AVAILABLE</h1>
-    <div>
-        <h2>Parameters for control sample beta(a, b)</h2>
-        <div>
-            <div>
-                <div class="block">
-                    <label for="M0">Number of samples M0</label>
-                    <input type="number" id="M0" value="5">
-                </div>
+    <div class="row">
+        <div class="column">
+            <h2>Control sample beta(a, b)</h2>
+            <div class="block">
+                <label for="">Range of samples M0</label>
+                <input type="number" id="M0_min" value="" style="width: 60px;">
+                ~
+                <input type="number" id="M0_max" value="" style="width: 60px;">
+            </div>
             <div class="block">
                 <label for="N0">Number of cells N0</label>
-                <input type="number" id="N0" value="1000">
+                <input type="number" id="N0" value="">
             </div>
             <h3>Beta distribution</h3>
             <h4>Mean and variance</h4>
             <div class="block">
                 <label for="mean0">Mean</label>
-                <input type="number" id="mean0" value="0.44444" step="0.1" onchange="execBetaStatParam(0)">
+                <input type="number" id="mean0" value="" step="0.1" onchange="execBetaStatParam(0)">
             </div>
             <div class="block">
                 <label for="">Std</label>
-                <input type="number" id="std0" value="0.114" step="0.1" onchange="execBetaStatParam(0)">
+                <input type="number" id="std0" value="" step="0.1" onchange="execBetaStatParam(0)">
             </div>
             <h4>a and b</h4>
             <div class="block">
                 <label for="">a0</label>
-                <input type="number" id="a0" value="8" step="1" onchange="execBetaParamStat(0)">
+                <input type="number" id="a0" value="" step="1" onchange="execBetaParamStat(0)">
             </div>
             <div class="block">
                 <label for="">b0</label>
-                <input type="number" id="b0" value="10" step="1" onchange="execBetaParamStat(0)">
+                <input type="number" id="b0" value="" step="1" onchange="execBetaParamStat(0)">
             </div>
         </div>
 
-        <h2>Parameters for experimental sample beta(a, b)</h2>
-        <div>
-            <div class="block">
-                <label for="M1">Number of samples M1</label>
-                <input type="number" id="M1" value="5">
-            </div>
+        <div class="column">
+            <h2>Experimental sample beta(a, b)</h2>
+            <label for="">Range of samples M0</label>
+            <input type="number" id="M1_min" value="" style="width: 60px;">
+            ~
+            <input type="number" id="M1_max" value="" style="width: 60px;">
             <div class="block">
                 <label for="N1">Number of cells N1</label>
-                <input type="number" id="N1" value="1000">
+                <input type="number" id="N1" value="">
             </div>
             <h3>Beta distribution</h3>
             <h4>Mean and variance</h4>
             <div class="block">
                 <label for="mean1">Mean</label>
-                <input type="number" id="mean1" value="0.55556" step="0.1" onchange="execBetaStatParam(1)">
+                <input type="number" id="mean1" value="" step="0.1" onchange="execBetaStatParam(1)">
             </div>
             <div class="block">
                 <label for="">Std</label>
-                <input type="number" id="std1" value="0.114" step="0.1" onchange="execBetaStatParam(1)">
+                <input type="number" id="std1" value="" step="0.1" onchange="execBetaStatParam(1)">
             </div>
             <h4>a and b</h4>
             <div class="block">
                 <label for="">a0</label>
-                <input type="number" id="a1" value="10" step="1" onchange="execBetaParamStat(1)">
+                <input type="number" id="a1" value="" step="1" onchange="execBetaParamStat(1)">
             </div>
             <div class="block">
                 <label for="">b0</label>
-                <input type="number" id="b1" value="8" step="1" onchange="execBetaParamStat(1)">
+                <input type="number" id="b1" value="" step="1" onchange="execBetaParamStat(1)">
             </div>
         </div>
-
-        <h2>False positive rate α</h2>
-        <div>
-            <div class="block">
-                <label for="alpha">False positive rate α</label>
-                <input type="number" id="alpha" value="0.05">
-            </div>
-        </div>
-
-        <input type="button" id="create" value="Calculate beta" onclick="execCalcBeta();"/>
-
-
     </div>
-    <div>
-        <h2>Result</h2>
-        <h3>One-sided</h3>
-        <div>
-            <div class="block">
-                <label for="beta1">False negative rate β</label>
-                <input type="number" id="beta1" value="">
+    <div class="row">
+        <div class="column">
+            <h2>Parameters for t-test</h2>
+            <div>
+                <div class="block">
+                    <label for="alpha">False positive rate α</label>
+                    <input type="number" id="alpha" value="">
+                </div>
+                <div class="block">
+                    <label for="beta">False negative rate β</label>
+                    <input type="number" id="beta" value="">
+                </div>
+            </div>
+
+            <input type="button" id="create" value="Calculate beta" onclick="execCalcBeta();"/>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="column">
+            <h2>Result</h2>
+            False negative rates. Lower is better. Each row correponds to a fixed number of control samples.
+            Each row correponds to a fixed number of experimental samples.
+            <div>
+                <h2>One-sided</h2>
+                <div id="one_sided">
+                    Results pending calculating...
+                </div>
+            </div>
+            <div>
+                <h2>Two-sided</h2>
+                <div id="two_sided">
+                    Results pending calculating...
+                </div>
             </div>
         </div>
-        <h3>Two-sided</h3>
-        <div>
-            <div class="block">
-                <label for="beta2">False negative rate β</label>
-                <input type="number" id="beta2" value="">
-            </div>
+    </div>
+
+    <div class="row">
+        <div class="column">
+            <h2>Instructions</h2>
+            You are going to choose value of M0 and M1, correponding to M0 control samples and M1 experimental samples.
+            You are going to choose between a range of M0_min ~ M0_max and M1_min ~ M1_max.
+            You do single-cell sequencing on each of the samples.
+            You have an estimate of N0 and N1 cells resulting from each sample. 
+            (Note: cells in cell types whose number may vary a lot should be excluded to avoid composition effect.)
+            <br /><br />
+            For each sample, you have an estimate of the proportion of the cell type you are interested in, that is "Mean".
+            You also have an estimate of how the proportion may vary in different donors, that is "Std".
+            The a and b of the beta distribution will be automatically calculated based on this.
+
+            You can also choose to give the parameters a and b of the beta distribution. 
+            The mean and std will be automatically calculated based on this.
+            <br /><br />
+            You then choose a threshold of p-value, say 0.05.
+            <br /><br />
+            You can now calculate the probability of getting a false negative result.
         </div>
-        <div id="holder"> debug </div>
     </div>
 </body>
+
+<script>
+    init();
+</script>
+
 </html>

@@ -1,27 +1,25 @@
 <html>
 <head>
-  <title>Beta for a single sample size</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <title>Beta for a single sample size</title>
+    <style>
+        * {
+        box-sizing: border-box;
+        }
 
-    label {
-        display: inline-block;
-        width: 150px;
-        text-align: left;
-    }​
+        .row {
+        display: flex;
+        }
 
-    .row {
-      display: flex;
-    }
-
-    /* Create two equal columns that sits next to each other */
-    .column {
-      flex: 50%;
-      padding: 10px;
-      height: 300px; /* Should be removed. Only for demonstration */
-    }
+        .column {
+        flex: 50%;
+        padding: 10px;
+        }
+        
+        label {
+            display: inline-block;
+            width: 150px;
+            text-align: left;
+        }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
@@ -98,8 +96,8 @@
             Ep0 = a0 / (a0 + b0);
             Ep1 = a1 / (a1 + b1);
             
-            Vp0 = a0 * b0 * (a0 + b0 + N0) / ((M0 * N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
-            Vp1 = a1 * b1 * (a1 + b1 + N1) / ((M1 * N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
+            Vp0 = a0 * b0 * (a0 + b0 + N0) / ((N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
+            Vp1 = a1 * b1 * (a1 + b1 + N1) / ((N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
 
             S = Math.sqrt((((M0 - 1) * Vp0) + ((M1 - 1) * Vp1)) / (M0 + M1 - 2));
 
@@ -128,102 +126,144 @@
             document.getElementById("beta1").value = round(temp[0], 5);
             document.getElementById("beta2").value = round(temp[1], 5);
         }
+
+        function init()
+        {
+            document.getElementById("M0").value = 10;
+            document.getElementById("M1").value = 10;
+            document.getElementById("N0").value = 1000;
+            document.getElementById("N1").value = 1000;
+            document.getElementById("a0").value = 7;
+            document.getElementById("a1").value = 10;
+            document.getElementById("b0").value = 10;
+            document.getElementById("b1").value = 7;
+            document.getElementById("alpha").value = 0.05;
+            execBetaParamStat(0); 
+            execBetaParamStat(1)
+        }
   </script>
 </head>     
 <body>
-    <div>
-        <h2>Parameters for control sample beta(a, b)</h2>
-        <div>
-            <div>
-                <div class="block">
-                    <label for="M0">Number of samples M0</label>
-                    <input type="number" id="M0" value="5">
-                </div>
+    <div class="row">
+        <div class="column">
+            <h2>Control sample beta(a, b)</h2>
+            <div class="block">
+                <label for="M0">Number of samples M0</label>
+                <input type="number" id="M0" value="">
+            </div>
             <div class="block">
                 <label for="N0">Number of cells N0</label>
-                <input type="number" id="N0" value="1000">
+                <input type="number" id="N0" value="">
             </div>
             <h3>Beta distribution</h3>
             <h4>Mean and variance</h4>
             <div class="block">
                 <label for="mean0">Mean</label>
-                <input type="number" id="mean0" value="0.44444" step="0.1" onchange="execBetaStatParam(0)">
+                <input type="number" id="mean0" value="" step="0.1" onchange="execBetaStatParam(0)">
             </div>
             <div class="block">
                 <label for="">Std</label>
-                <input type="number" id="std0" value="0.114" step="0.1" onchange="execBetaStatParam(0)">
+                <input type="number" id="std0" value="" step="0.1" onchange="execBetaStatParam(0)">
             </div>
             <h4>a and b</h4>
             <div class="block">
                 <label for="">a0</label>
-                <input type="number" id="a0" value="8" step="1" onchange="execBetaParamStat(0)">
+                <input type="number" id="a0" value="" step="1" onchange="execBetaParamStat(0)">
             </div>
             <div class="block">
                 <label for="">b0</label>
-                <input type="number" id="b0" value="10" step="1" onchange="execBetaParamStat(0)">
+                <input type="number" id="b0" value="" step="1" onchange="execBetaParamStat(0)">
             </div>
         </div>
 
-        <h2>Parameters for experimental sample beta(a, b)</h2>
-        <div>
+        <div class="column">
+            <h2>Experimental sample beta(a, b)</h2>
             <div class="block">
                 <label for="M1">Number of samples M1</label>
-                <input type="number" id="M1" value="5">
+                <input type="number" id="M1" value="">
             </div>
             <div class="block">
                 <label for="N1">Number of cells N1</label>
-                <input type="number" id="N1" value="1000">
+                <input type="number" id="N1" value="">
             </div>
             <h3>Beta distribution</h3>
             <h4>Mean and variance</h4>
             <div class="block">
                 <label for="mean1">Mean</label>
-                <input type="number" id="mean1" value="0.55556" step="0.1" onchange="execBetaStatParam(1)">
+                <input type="number" id="mean1" value="" step="0.1" onchange="execBetaStatParam(1)">
             </div>
             <div class="block">
                 <label for="">Std</label>
-                <input type="number" id="std1" value="0.114" step="0.1" onchange="execBetaStatParam(1)">
+                <input type="number" id="std1" value="" step="0.1" onchange="execBetaStatParam(1)">
             </div>
             <h4>a and b</h4>
             <div class="block">
                 <label for="">a0</label>
-                <input type="number" id="a1" value="10" step="1" onchange="execBetaParamStat(1)">
+                <input type="number" id="a1" value="" step="1" onchange="execBetaParamStat(1)">
             </div>
             <div class="block">
                 <label for="">b0</label>
-                <input type="number" id="b1" value="8" step="1" onchange="execBetaParamStat(1)">
+                <input type="number" id="b1" value="" step="1" onchange="execBetaParamStat(1)">
             </div>
         </div>
-
-        <h2>False positive rate α</h2>
-        <div>
-            <div class="block">
-                <label for="alpha">False positive rate α</label>
-                <input type="number" id="alpha" value="0.05">
-            </div>
-        </div>
-
-        <input type="button" id="create" value="Calculate beta" onclick="execCalcBeta();"/>
-
-
     </div>
-    <div>
-        <h2>Result</h2>
-        <h3>One-sided</h3>
-        <div>
-            <div class="block">
-                <label for="beta1">False negative rate β</label>
-                <input type="number" id="beta1" value="">
+    <div class="row">
+        <div class="column">
+            <h2>False positive rate α</h2>
+            <div>
+                <div class="block">
+                    <label for="alpha">False positive rate α</label>
+                    <input type="number" id="alpha" value="">
+                </div>
             </div>
+
+            <input type="button" id="create" value="Calculate beta" onclick="execCalcBeta();"/>
         </div>
-        <h3>Two-sided</h3>
-        <div>
-            <div class="block">
-                <label for="beta2">False negative rate β</label>
-                <input type="number" id="beta2" value="">
+    </div>
+
+    <div class="row">
+        <div class="column">
+            <h2>Result</h2>
+
+            <h3>One-sided</h3>
+            <div>
+                <div class="block">
+                    <label for="beta1">False negative rate β</label>
+                    <input type="number" id="beta1" value="">
+                </div>
             </div>
+
+            <h3>Two-sided</h3>
+            <div>
+                <div class="block">
+                    <label for="beta2">False negative rate β</label>
+                    <input type="number" id="beta2" value="">
+                </div>
+            </div>
+            <div id="holder"> debug </div>
         </div>
-        <div id="holder"> debug </div>
+    </div>
+
+    <div class="row">
+        <div class="column">
+            <h2>Instructions</h2>
+            You have M0 control samples, and M1 experimental samples. 
+            You do single-cell sequencing on each of the samples.
+            You have an estimate of N0 and N1 cells resulting from each sample. 
+            (Note: cells in cell types whose number may vary a lot should be excluded to avoid composition effect.)
+            <br /><br />
+            For each sample, you have an estimate of the proportion of the cell type you are interested in, that is "Mean".
+            You also have an estimate of how the proportion may vary in different donors, that is "Std".
+            <br /><br />
+            You then choose a threshold of p-value, say 0.05.
+            <br /><br />
+            You can now calculate the probability of getting a false negative result.
+        </div>
     </div>
 </body>
+
+<script>
+    init();
+</script>
+
 </html>

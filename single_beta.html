@@ -103,8 +103,11 @@
 
             Et = Math.abs(Ep1 - Ep0) / S / Math.sqrt(1 / M0 + 1 / M1);
 
-            t_star1 = jStat.studentt.inv(1 - alpha, M0 + M1 - 2);
-            t_star2 = jStat.studentt.inv(1 - alpha / 2, M0 + M1 - 2);
+            nu = (Vp0 / M0 + Vp1 / M1) ** 2 / ((Vp0 / M0) ** 2 / (M0 - 1) + (Vp1 / M1) ** 2 / (M1 - 1));
+
+            t_star1 = jStat.studentt.inv(1 - alpha, nu);
+            t_star2 = jStat.studentt.inv(1 - alpha / 2, nu);
+
 
             return [jStat.normal.cdf(t_star1 - Et, 0, 1), jStat.normal.cdf(t_star2 - Et, 0, 1)]
         }

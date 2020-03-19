@@ -1,24 +1,103 @@
 <html>
 <head>
     <title>Beta for a single sample size</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <style>
         * {
         box-sizing: border-box;
+        }
+
+        body, html {
+        height: 100%;
+        margin: 0;
+        font-family: Arial;
+        }
+
+        /* Style tab links */
+        .tablink {
+            border-radius: 10px 10px 0px 0px;
+        background-color: #555;
+        color: white;
+        float: left;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 8px 16px;
+        font-size: 17px;
+        width: 300px;
+        height: 40px;
+        }
+
+        .tablink:hover {
+        background-color: #777;
+        }
+
+        /* Style the tab content (and add height:100% for full page content) */
+        .tabcontent {
+        /*color: white;*/
+        display: none;
+        padding: 40px 0px;
+        height: 100%;
         }
 
         .row {
         display: flex;
         }
 
+        .column1 {
+        flex: 100%;
+        border-radius: 10px;
+        border: 2px solid #73AD21;
+        padding: 10px;
+        margin: 3px;
+        }
+
         .column {
         flex: 50%;
+        border-radius: 10px;
+        border: 2px solid #73AD21;
         padding: 10px;
+        margin: 3px;
+        }
+
+        .column30 {
+        flex: 30%;
+        border-radius: 10px;
+        border: 2px solid #73AD21;
+        padding: 10px;
+        margin: 3px;
+        min-width: 300px;
+        }
+
+        .column40 {
+        flex: 40%;
+        border-radius: 10px;
+        border: 2px solid #73AD21;
+        padding: 10px;
+        margin: 3px;
+        }
+
+        .column70 {
+        flex: 70%;
+        border-radius: 10px;
+        border: 2px solid #73AD21;
+        padding: 10px;
+        margin: 3px;
         }
         
         label {
             display: inline-block;
             width: 150px;
             text-align: left;
+        }
+
+        input[type=number] {
+            width:100px;
+            margin: 2px;
+            padding-left: 3px;
+            border: none; /* <-- This thing here */
+            border:solid 1px #ccc;
+            border-radius: 3px;
         }
 
     </style>
@@ -49,15 +128,15 @@
         function execBetaParamStat(suffix)
         {
             var temp = betaParamStat(document.getElementById("a".concat(suffix)).value, document.getElementById("b".concat(suffix)).value);
-            document.getElementById("mean".concat(suffix)).value = round(temp[0], 5);
-            document.getElementById("std".concat(suffix)).value = round(temp[1], 5);
+            document.getElementById("mean".concat(suffix)).value = round(temp[0], 4);
+            document.getElementById("std".concat(suffix)).value = round(temp[1], 4);
         }
 
         function execBetaStatParam(suffix)
         {
             var temp = betaStatParam(document.getElementById("mean".concat(suffix)).value, document.getElementById("std".concat(suffix)).value);
-            document.getElementById("a".concat(suffix)).value = round(temp[0], 5);
-            document.getElementById("b".concat(suffix)).value = round(temp[1], 5);
+            document.getElementById("a".concat(suffix)).value = round(temp[0], 3);
+            document.getElementById("b".concat(suffix)).value = round(temp[1], 3);
         }
 
         function calcBeta(M0, M1, N0, N1, a0, a1, b0, b1, alpha)
@@ -108,14 +187,14 @@
 
             var beta = parseFloat(document.getElementById("beta").value);
 
-            var output1 = "<table border='1' width='500' cellspacing='0'cellpadding='5'>";
-            var output2 = "<table border='1' width='500' cellspacing='0'cellpadding='5'>";
+            var output1 = "<table class='w3-table' border='1' width='500' cellspacing='0'cellpadding='5'>";
+            var output2 = "<table class='w3-table' border='1' width='500' cellspacing='0'cellpadding='5'>";
 
             output1 = output1 + "<tr>";
             output2 = output2 + "<tr>";
 
-            output1 = output1 + "<td>" + "ctrl\\exp" + "</td>";
-            output2 = output2 + "<td>" + "ctrl\\exp" + "</td>";
+            output1 = output1 + "<td>" + "ctrl \\ exp" + "</td>";
+            output2 = output2 + "<td>" + "ctrl \\ exp" + "</td>";
 
             for (j = M1_min; j <= M1_max; j++)
             {
@@ -146,10 +225,13 @@
             }
             output1 = output1 + "</table>";
             output2 = output2 + "</table>";
-            document.getElementById("one_sided").innerHTML = output1;
-            document.getElementById("two_sided").innerHTML = output2;
 
-            document.getElementById("results").scrollIntoView();
+            document.getElementById("M0_min").value
+
+            if (document.getElementById('one_sided').checked) document.getElementById("result").innerHTML = output1;
+            else document.getElementById("result").innerHTML = output2;
+
+            //document.getElementById("results").scrollIntoView();
         }
 
         function plotBeta()
@@ -182,7 +264,9 @@
             };
             var data = [ctrl, exp];
 
-            Plotly.newPlot('plot', data)
+            var layout = {showlegend: true, legend: {"orientation": "h"}, height: 300, width: 400};
+
+            Plotly.newPlot('plot', data, layout)
         }
 
         function init()
@@ -204,141 +288,190 @@
 
             plotBeta();
         }
+
   </script>
 </head>     
 <body>
-    <div class="row">
-        <div class="column">
-            <h2>Control sample beta(a, b)</h2>
-            <div class="block">
-                <label for="">Range of samples M0</label>
-                <input type="number" id="M0_min" value="" style="width: 60px;">
+    <button class="tablink" onclick="openPage('main', this, 'green')" id="defaultOpen">Power Calculation</button>
+    <button class="tablink" onclick="openPage('instructions', this, 'green')">Instructions</button>
+
+    <div class="tabcontent" id="main">
+        <div class="row">
+            <div class="column30">
+                <h2>Control sample</h2>
+                <div class="block">
+                    <label for="">Range of samples M<sub>0</sub></label>
+                    <input type="number" id="M0_min" value="" style="width: 45px;">
+                    ~
+                    <input type="number" id="M0_max" value="" style="width: 45px;">
+                </div>
+                <div class="block">
+                    <label for="N0">Number of cells N<sub>0</sub></label>
+                    <input type="number" id="N0" value="" step=100>
+                </div>
+                <h3>Beta distribution</h3>
+                <h4><b>Specify</b> Mean and variance</h4>
+                <div class="block">
+                    <label for="mean0">Mean</label>
+                    <input type="number" id="mean0" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam(0); plotBeta();">
+                </div>
+                <div class="block">
+                    <label for="">Standard deviation</label>
+                    <input type="number" id="std0" value="" step="0.01" min="0.001" onchange="execBetaStatParam(0); plotBeta();">
+                </div>
+                <h4><b>or</b> a<sub>0</sub> and b<sub>0</sub></h4>
+                <div class="block">
+                    Beta(a<sub>0</sub> = 
+                    <input type="number" id="a0" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(1); plotBeta();">
+                    , b<sub>0</sub> = 
+                    <input type="number" id="b0" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(1); plotBeta();">
+                    )
+                </div>
+            </div>
+
+            <div class="column30">
+                <h2>Experimental sample</h2>
+                <label for="">Range of samples M<sub>1</sub></label>
+                <input type="number" id="M1_min" value="" style="width: 45px;">
                 ~
-                <input type="number" id="M0_max" value="" style="width: 60px;">
-            </div>
-            <div class="block">
-                <label for="N0">Number of cells N0</label>
-                <input type="number" id="N0" value="">
-            </div>
-            <h3>Beta distribution</h3>
-            <h4>Mean and variance</h4>
-            <div class="block">
-                <label for="mean0">Mean</label>
-                <input type="number" id="mean0" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam(0); plotBeta();">
-            </div>
-            <div class="block">
-                <label for="">Std</label>
-                <input type="number" id="std0" value="" step="0.01" min="0.001" onchange="execBetaStatParam(0); plotBeta();">
-            </div>
-            <h4>a and b</h4>
-            <div class="block">
-                <label for="">a0</label>
-                <input type="number" id="a0" value="" step="1" min="1" onchange="execBetaParamStat(0); plotBeta();">
-            </div>
-            <div class="block">
-                <label for="">b0</label>
-                <input type="number" id="b0" value="" step="1" min="1" onchange="execBetaParamStat(0); plotBeta();">
-            </div>
-        </div>
-
-        <div class="column">
-            <h2>Experimental sample beta(a, b)</h2>
-            <label for="">Range of samples M1</label>
-            <input type="number" id="M1_min" value="" style="width: 60px;">
-            ~
-            <input type="number" id="M1_max" value="" style="width: 60px;">
-            <div class="block">
-                <label for="N1">Number of cells N1</label>
-                <input type="number" id="N1" value="">
-            </div>
-            <h3>Beta distribution</h3>
-            <h4>Mean and variance</h4>
-            <div class="block">
-                <label for="mean1">Mean</label>
-                <input type="number" id="mean1" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam(1); plotBeta();">
-            </div>
-            <div class="block">
-                <label for="">Std</label>
-                <input type="number" id="std1" value="" step="0.01" min="0.001" onchange="execBetaStatParam(1); plotBeta();">
-            </div>
-            <h4>a and b</h4>
-            <div class="block">
-                <label for="">a1</label>
-                <input type="number" id="a1" value="" step="1" min="1" onchange="execBetaParamStat(1); plotBeta();">
-            </div>
-            <div class="block">
-                <label for="">b1</label>
-                <input type="number" id="b1" value="" step="1" min="1" onchange="execBetaParamStat(1); plotBeta();">
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div id='plot'><!-- Plotly chart will be drawn inside this DIV --></div>
-    </div>
-
-    <div class="row">
-        <div class="column">
-            <h2>Parameters for t-test</h2>
-            <div>
+                <input type="number" id="M1_max" value="" style="width: 45px;">
                 <div class="block">
-                    <label for="alpha">False positive rate α</label>
-                    <input type="number" id="alpha" value="">
+                    <label for="N1">Number of cells N<sub>1</sub></label>
+                    <input type="number" id="N1" value="" step=100>
+                </div>
+                <h3>Beta distribution</h3>
+                <h4><b>Specify</b> Mean and variance</h4>
+                <div class="block">
+                    <label for="mean1">Mean</label>
+                    <input type="number" id="mean1" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam(1); plotBeta();">
                 </div>
                 <div class="block">
-                    <label for="beta">False negative threshold Thβ</label>
-                    <input type="number" id="beta" value="">
+                    <label for="">Standard deviation</label>
+                    <input type="number" id="std1" value="" step="0.01" min="0.001" onchange="execBetaStatParam(1); plotBeta();">
+                </div>
+                <h4><b>or</b> a<sub>1</sub> and b<sub>1</sub></h4>
+                <div class="block">
+                    Beta(a<sub>1</sub> = 
+                    <input type="number" id="a1" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(1); plotBeta();">
+                    , b<sub>1</sub> = 
+                    <input type="number" id="b1" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(1); plotBeta();">
+                    )
                 </div>
             </div>
 
-            <input type="button" id="create" value="Calculate beta table" onclick="execCalcBeta(); "/>
+            <div class="column40">
+                <h2>Visualize Beta-distributions</h2>
+                <div id='plot'><!-- Plotly chart will be drawn inside this DIV --></div>
+                <div>The graph will update when you change the Mean, Std, a1 or b1.</div>
+            </div>
+
         </div>
-    </div>
+        
 
-    <div class="row" id="results">
-        <div class="column">
-            <h2>Result</h2>
-            False negative rates. Lower is better. Each row correponds to a fixed number of control samples.
-            Each row correponds to a fixed number of experimental samples. Values pass Thβ are colored in gray.
-            <div>
-                <h2>One-sided</h2>
-                <div id="one_sided">
-                    Results pending calculating...
+        <div class="row">
+            <div class="column30">
+                <h2>t-Test</h2>
+                <div>
+                    <div class="block">
+                        <label for="alpha">False positive rate α</label>
+                        <input type="number" id="alpha" value="" step=0.01>
+                    </div>
+                    <div class="block">
+                        <label for="beta">False negative threshold β<sub>th</sub></label>
+                        <input type="number" id="beta" value="" step=0.01>
+                    </div>
+                    <div>
+                        <h3>Type</h3>
+                        <div>
+                            <input type="radio" id="one_sided" name="test_type" value="one_sided" checked>
+                            <label for="One-sided t-test">One-sided t-test</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="two_sided" name="test_type" value="two_sided">
+                            <label for="Two-sided t-test">Two-sided t-test</label>
+                        </div>
+                    </div>
                 </div>
+
+                <!--<input type="button" id="create" value="Calculate beta table" onclick="execCalcBeta(); "/>-->
             </div>
-            <div>
-                <h2>Two-sided</h2>
-                <div id="two_sided">
-                    Results pending calculating...
+
+            <div class="column70">
+                <h2>Result</h2>
+                <div>
+                    <div id="result">
+                        Results pending calculating...
+                    </div>
+                </div>
+                <div>False negative rates. Lower is better. Each row correponds to a fixed number of control samples.
+                     Each row correponds to a fixed number of experimental samples. Values pass β<sub>th</sub> are colored in gray.
                 </div>
             </div>
         </div>
+
     </div>
-
-    <div class="row">
-        <div class="column">
-            <h2>Instructions</h2>
-            You are going to choose value of M0 and M1, correponding to M0 control samples and M1 experimental samples.
-            You are going to choose between a range of M0_min ~ M0_max and M1_min ~ M1_max.
-            You do single-cell sequencing on each of the samples.
-            You have an estimate of N0 and N1 cells resulting from each sample. 
-            (Note: cells in cell types whose number may vary a lot should be excluded to avoid composition effect.)
-            <br /><br />
-            For each sample, you have an estimate of the proportion of the cell type you are interested in, that is "Mean".
-            You also have an estimate of how the proportion may vary in different donors, that is "Std".
-            The a and b of the beta distribution will be automatically calculated based on this.
-
-            You can also choose to give the parameters a and b of the beta distribution. 
-            The mean and std will be automatically calculated based on this.
-            <br /><br />
-            You then choose a threshold of p-value, say 0.05.
-            <br /><br />
-            You can now calculate the probability of getting a false negative result.
+    <div class="tabcontent" id="instructions">
+        <div class="row">
+            <div class="column">
+                <h2>Instructions</h2>
+                <ol>
+                    <li>Set range of M<sub>0</sub> and M<sub>1</sub>, i.e., the numbers of samples in control group and experimental group, respectively.</li>
+                    <li>Set N<sub>0</sub> and N<sub>1</sub> for number of cells in each sample for each group. (Total number of cells = M<sub>0</sub>N<sub>0</sub> + M<sub>1</sub>N<sub>1</sub>) </li>
+                    <li>Set mean and standard deviation for proportion of a cell type. This corresponds to variances among samples in a group.<b>Alternatively</b>, set a and b for each beta distribution.</li>
+                    <li>Set α, it is the threshold for a significant p-value. 0.05 and 0.01 are commonly used.</li>
+                    <li>Set threshold β<sub>th</sub> for preferred false negative rate. It is the probability of failing to yield a siginificant result.</li>
+                    <li>Choose from one-sided test and two-sided test.</li>
+                </ol>
+                The table will automatically refresh when a value is changed.
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <h2>Q&A</h2>
+            
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <h2>About</h2>
+                Github: <a href="https://github.com/KChen-lab/sensei">https://github.com/KChen-lab/sensei</a>
+            </div>
         </div>
     </div>
 </body>
 
 <script>
     init();
+    function openPage(pageName, elmnt, color) {
+        // Hide all elements with class="tabcontent" by default */
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Remove the background color of all tablinks/buttons
+        tablinks = document.getElementsByClassName("tablink");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].style.backgroundColor = "";
+        }
+
+        // Show the specific tab content
+        document.getElementById(pageName).style.display = "block";
+
+        // Add the specific color to the button used to open the tab content
+        elmnt.style.backgroundColor = color;
+        }
+
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+
+        var inputs = document.getElementsByTagName("input"); 
+        for (i=0; i<inputs.length; i++){
+            inputs[i].setAttribute('onchange', inputs[i].getAttribute('onchange') + '; execCalcBeta();');
+        }
+
+        execCalcBeta();
 </script>
 
 </html>

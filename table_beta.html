@@ -250,7 +250,7 @@
             x: x,
             y: y,
             type: 'scatter',
-            name: 'Control sample'
+            name: 'Control'
             };
 
             y = []
@@ -260,11 +260,19 @@
             x: x,
             y: y,
             type: 'scatter',
-            name: 'Experimental sample'
+            name: 'Experimental'
             };
             var data = [ctrl, exp];
 
-            var layout = {showlegend: true, legend: {"orientation": "h"}, height: 300, width: 400};
+            var layout = {showlegend: true, legend: {"orientation": "h"}, height: 300, width: 400,
+            margin: {
+                    l: 50,
+                    r: 50,
+                    b: 50,
+                    t: 50,
+                    pad: 4
+                }
+            };
 
             Plotly.newPlot('plot', data, layout)
         }

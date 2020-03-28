@@ -91,12 +91,6 @@
             text-align: left;
         }
 
-        label.radio {
-            display: inline-block;
-            width: 250px;
-            text-align: left;
-        }
-
         input[type=number] {
             width:100px;
             margin: 2px;
@@ -106,10 +100,6 @@
             border-radius: 3px;
         }
 
-        a.glossaryLink {
-            cursor: help;
-            border-bottom: 1px dashed #73AD21;
-        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
     <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
@@ -149,7 +139,7 @@
             document.getElementById("b".concat(suffix)).value = round(temp[1], 3);
         }
 
-        function calcBetaRaw(M0, M1, N0, N1, a0, a1, b0, b1, alpha, test_type, offset, sign)
+        function calcBeta(M0, M1, N0, N1, a0, a1, b0, b1, alpha)
         {
             N0 = parseFloat(N0);
             N1 = parseFloat(N1);
@@ -167,40 +157,14 @@
             Vp0 = a0 * b0 * (a0 + b0 + N0) / ((N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
             Vp1 = a1 * b1 * (a1 + b1 + N1) / ((N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
 
-            Et = (Ep1 - (Ep0 + offset)) / Math.sqrt(Vp0 / M0 + Vp1 / M1);
-
-            console.log(sign);
-
-            if (sign == 0) {
-                Et = Math.abs(Et);
-            } else {
-                Et = sign * Et;
-            }
-
-            nu = (Vp0 / M0 + Vp1 / M1) ** 2 / ((Vp0 / M0) ** 2 / (M0 - 1) + (Vp1 / M1) ** 2 / (M1 - 1));
-
-            if (test_type === "one_sided") t_star = jStat.studentt.inv(1 - alpha, nu);
-            else t_star = jStat.studentt.inv(1 - alpha / 2, nu);
-
-            return jStat.normal.cdf(t_star - Et, 0, 1)
-        }
-
-        function calcBeta(M0, M1, N0, N1, a0, a1, b0, b1, alpha)
-        {
-            Ep0 = a0 / (a0 + b0);
-            Ep1 = a1 / (a1 + b1);
-            
-            Vp0 = a0 * b0 * (a0 + b0 + N0) / ((N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
-            Vp1 = a1 * b1 * (a1 + b1 + N1) / ((N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
-
             Et = Math.abs(Ep1 - Ep0) / Math.sqrt(Vp0 / M0 + Vp1 / M1);
 
             nu = (Vp0 / M0 + Vp1 / M1) ** 2 / ((Vp0 / M0) ** 2 / (M0 - 1) + (Vp1 / M1) ** 2 / (M1 - 1));
 
-            if (test_type === "one_sided") t_star = jStat.studentt.inv(1 - alpha, nu);
-            else t_star = jStat.studentt.inv(1 - alpha / 2, nu);
+            t_star1 = jStat.studentt.inv(1 - alpha, nu);
+            t_star2 = jStat.studentt.inv(1 - alpha / 2, nu);
 
-            return jStat.normal.cdf(t_star - Et, 0, 1)
+            return [jStat.normal.cdf(t_star1 - Et, 0, 1), jStat.normal.cdf(t_star2 - Et, 0, 1)]
         }
 
         function round(x, p) {return Math.round(x * Math.pow(10, p)) / Math.pow(10, p)}
@@ -213,84 +177,59 @@
             var M1_min = parseFloat(document.getElementById("M1_min").value); 
             var M1_max = parseFloat(document.getElementById("M1_max").value);
 
-            var N0 = parseFloat(document.getElementById("N0").value);
-            var N1 = parseFloat(document.getElementById("N1").value);
-            var a0 = parseFloat(document.getElementById("a0").value);
-            var a1 = parseFloat(document.getElementById("a1").value);
-            var b0 = parseFloat(document.getElementById("b0").value);
-            var b1 = parseFloat(document.getElementById("b1").value);
-            var alpha = parseFloat(document.getElementById("alpha").value);
+            var N0 = document.getElementById("N0").value;
+            var N1 = document.getElementById("N1").value;
+            var a0 = document.getElementById("a0").value;
+            var a1 = document.getElementById("a1").value;
+            var b0 = document.getElementById("b0").value;
+            var b1 = document.getElementById("b1").value;
+            var alpha = document.getElementById("alpha").value;
 
             var beta = parseFloat(document.getElementById("beta").value);
 
-            var test_type = "";
-            var sign = 0;
-            var offset = 0.0;
-            var lower_bound = 0.0;
-            var upper_bound = 0.0;
+            var output1 = "<table class='w3-table' border='1' width='500' cellspacing='0'cellpadding='5'>";
+            var output2 = "<table class='w3-table' border='1' width='500' cellspacing='0'cellpadding='5'>";
 
-            if (document.getElementById('one_sided').checked) {
-                test_type = "one_sided";
-                sign = 0;
-                offset = 0.0;
-            } else if (document.getElementById('two_sided').checked) {
-                test_type = "two_sided";
-                sign = 0;
-                offset = 0.0;
-            } else if (document.getElementById('sesoi_test').checked) {
-                test_type = "one_sided";
-                offset = parseFloat(document.getElementById("sesoi_bound").value);
-                if (offset == 0) {
-                    //document.getElementById("result").innerHTML = "<p>Invalid input: SESOI must not be zero.</p>"; 
-                    //return;
-                }
-                if (document.getElementById('sesoi_verify').checked) sign = Math.sign(offset);
-                else sign = -Math.sign(offset);
-            } else if (document.getElementById('tost_test').checked) {
-                test_type = "one_sided";
-                lower_bound = parseFloat(document.getElementById("tost_lower_bound").value);
-                upper_bound = parseFloat(document.getElementById("tost_upper_bound").value);
-            } else {
-                return; // do nothing.
-            }
+            output1 = output1 + "<tr>";
+            output2 = output2 + "<tr>";
 
-            var output = "<table class='w3-table' border='1' width='500' cellspacing='0'cellpadding='5'>";
-
-            output = output + "<tr>";
-            output = output + "<td>" + "ctrl \\ exp" + "</td>";
-
-            var temp = 1.0;
+            output1 = output1 + "<td>" + "ctrl \\ exp" + "</td>";
+            output2 = output2 + "<td>" + "ctrl \\ exp" + "</td>";
 
             for (j = M1_min; j <= M1_max; j++)
             {
-                output = output + "<td>" + j + "</td>";
+                output1 = output1 + "<td>" + j + "</td>";
+                output2 = output2 + "<td>" + j + "</td>";
             }
-            output = output + "</tr>";
+            output1 = output1 + "</tr>";
+            output2 = output2 + "</tr>";
 
             for(i = M0_min; i <= M0_max; i++)
             {
-                output = output + "<tr>";
-                output = output + "<td>" + i + "</td>";
+                output1 = output1 + "<tr>";
+                output2 = output2 + "<tr>";
+
+                output1 = output1 + "<td>" + i + "</td>";
+                output2 = output2 + "<td>" + i + "</td>";
 
                 for (j = M1_min; j <= M1_max; j++)
                 {   
-                    if (document.getElementById('tost_test').checked) {
-                        temp = Math.min((calcBetaRaw(i, j, N0, N1, a0, a1, b0, b1, alpha, test_type, upper_bound, -1) + 
-                                    calcBetaRaw(i, j, N0, N1, a0, a1, b0, b1, alpha, test_type, lower_bound, 1)), 
-                                  1);
-                    } else {
-                        temp = calcBetaRaw(i, j, N0, N1, a0, a1, b0, b1, alpha, test_type, offset, sign);
-                    }
-                    if (temp < beta) output = output + "<td bgcolor=#E0E0E0>" + round(temp, 3) + "</td>";
-                    else output = output + "<td>" + round(temp, 3) + "</td>";
+                    var temp = calcBeta(i, j, N0, N1, a0, a1, b0, b1, alpha)
+                    if (temp[0] < beta) output1 = output1 + "<td bgcolor=#E0E0E0>" + round(temp[0], 3) + "</td>";
+                    else output1 = output1 + "<td>" + round(temp[0], 3) + "</td>";
+                    if (temp[1] < beta) output2 = output2 + "<td bgcolor=#E0E0E0>" + round(temp[1], 3) + "</td>";
+                    else output2 = output2 + "<td>" + round(temp[1], 3) + "</td>";
                 }
-                output = output + "</tr>";
+                output1 = output1 + "</tr>";
+                output2 = output2 + "</tr>";
             }
-            output = output + "</table>";
+            output1 = output1 + "</table>";
+            output2 = output2 + "</table>";
 
             document.getElementById("M0_min").value
 
-            document.getElementById("result").innerHTML = output;
+            if (document.getElementById('one_sided').checked) document.getElementById("result").innerHTML = output1;
+            else document.getElementById("result").innerHTML = output2;
 
             //document.getElementById("results").scrollIntoView();
         }
@@ -302,102 +241,28 @@
             var b0 = parseFloat(document.getElementById("b0").value);
             var b1 = parseFloat(document.getElementById("b1").value);
 
-            x = [];
-            y = [];
-            for (i = 0.0; i <= 1.0; i = i + 0.005) x.push(i);
-            for (i = 0; i < x.length; i++) y.push(jStat.beta.pdf(x[i], a1, b1))
-            var exp = {
-                x: x,
-                y: y,
-                type: 'scatter',
-                name: 'Experimental'
+            x = []
+            y = []
+            for (i = 0.0; i <= 1.0; i = i + 0.01) x.push(i)
+            for (i = 0; i < x.length; i++) y.push(jStat.beta.pdf(x[i], a0, b0))
+            console.log(jStat.beta.pdf(0.5, 2, 2));
+            var ctrl = {
+            x: x,
+            y: y,
+            type: 'scatter',
+            name: 'Control'
             };
 
-            if (document.getElementById('one_sided').checked || document.getElementById('two_sided').checked) {
-                y = [];
-                for (i = 0; i < x.length; i++) y.push(jStat.beta.pdf(x[i], a0, b0));
-                var ctrl = {
-                    x: x,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Control'
-                };
-                var data = [ctrl, exp];
-            } else if (document.getElementById('sesoi_test').checked) {
-                offset = parseFloat(document.getElementById("sesoi_bound").value);
-                
-                y = [];
-                x1 = [];
-                for (i = 0; i < x.length; i++) {
-                    y.push(jStat.beta.pdf(x[i], a0, b0));
-                    x1.push(x[i] + offset);
-                }
-                var ctrl = {
-                    x: x,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Control'
-                };
+            y = []
+            for (i = 0; i < x.length; i++) y.push(jStat.beta.pdf(x[i], a1, b1))
 
-                var sesoi = {
-                    x: x1,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Control with SESOI',
-                    line: {
-                        dash: 'dot',
-                        color: '#1f77b4'
-                    }
-                };
-
-                var data = [ctrl, exp, sesoi];
-
-            } else if (document.getElementById('tost_test').checked) {
-                lower_bound = parseFloat(document.getElementById("tost_lower_bound").value);
-                upper_bound = parseFloat(document.getElementById("tost_upper_bound").value);
-
-                y = [];
-                x1 = [];
-                x2 = [];
-                for (i = 0; i < x.length; i++) {
-                    y.push(jStat.beta.pdf(x[i], a0, b0));
-                    x1.push(x[i] + lower_bound);
-                    x2.push(x[i] + upper_bound);
-                }
-                var ctrl = {
-                    x: x,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Control'
-                };
-
-                var lb = {
-                    x: x1,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Lower',
-                    line: {
-                        dash: 'dot',
-                        color: '#1f77b4'
-                    }
-                };
-
-                var ub = {
-                    x: x2,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Upper',
-                    line: {
-                        dash: 'dash',
-                        color: '#1f77b4'
-                    }
-                };
-
-                var data = [ctrl, exp, lb, ub];
-
-            } else {
-                return; // do nothing.
-            }
+            var exp = {
+            x: x,
+            y: y,
+            type: 'scatter',
+            name: 'Experimental'
+            };
+            var data = [ctrl, exp];
 
             var layout = {showlegend: true, legend: {"orientation": "h"}, height: 300, width: 400,
             margin: {
@@ -412,7 +277,25 @@
             Plotly.newPlot('plot', data, layout)
         }
 
+        function init()
+        {
+            document.getElementById("M0_min").value = 5;
+            document.getElementById("M1_min").value = 5;
+            document.getElementById("M0_max").value = 12;
+            document.getElementById("M1_max").value = 12;
+            document.getElementById("N0").value = 1000;
+            document.getElementById("N1").value = 1000;
+            document.getElementById("a0").value = 7;
+            document.getElementById("a1").value = 10;
+            document.getElementById("b0").value = 10;
+            document.getElementById("b1").value = 7;
+            document.getElementById("alpha").value = 0.05;
+            document.getElementById("beta").value = 0.1;
+            execBetaParamStat(0); 
+            execBetaParamStat(1);
 
+            plotBeta();
+        }
 
   </script>
 </head>     
@@ -495,7 +378,7 @@
 
         <div class="row">
             <div class="column30">
-                <h2>Statistical Test</h2>
+                <h2>t-Test</h2>
                 <div>
                     <div class="block">
                         <label for="alpha">False positive rate α</label>
@@ -508,50 +391,16 @@
                     <div>
                         <h3>Type</h3>
                         <div>
-                            <input type="radio" id="one_sided" name="test_type" value="one_sided" onchange="displayParams();" checked>
-                            <label class="radio" for="one_sided">One-sided t-test</label>
+                            <input type="radio" id="one_sided" name="test_type" value="one_sided" checked>
+                            <label for="One-sided t-test">One-sided t-test</label>
                         </div>
                         <div>
-                            <input type="radio" id="two_sided" name="test_type" value="two_sided" onchange="displayParams();">
-                            <label class="radio" for="two_sided">Two-sided t-test</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="sesoi_test" name="test_type" value="sesoi_test" onchange="displayParams();">
-                            <label class="radio" for="sesoi_test">t-Test with <a class="glossaryLink" title="SESOI: smallest effect size of interest">SESOI</a></label>
-                        </div>
-                        <div>
-                            <input type="radio" id="tost_test" name="test_type" value="sesoi_test" onchange="displayParams();">
-                            <label class="radio" for="tost_test"><a class="glossaryLink" title="TOST: two one-sided t-tests for equivalence">TOST</a></label>
-                        </div>
-                        <div id="sesoi_param">
-                            <h3>Parameters for SESOI</h3>
-                            <div>
-                                <input type="radio" id="sesoi_verify" name="sesoi_type" value="sesoi_verify" checked>
-                                <label class="radio" for="sesoi_verify"><a class="glossaryLink" title="test if the effect is significantly greater than specified">Verify</a></label>
-                            </div>
-                            <div>
-                                <input type="radio" id="sesoi_falsify" name="sesoi_type" value="sesoi_falsify">
-                                <label class="radio" for="sesoi_falsify"><a class="glossaryLink" title="test if the effect is significantly smaller than specified">Falsify</a></label>
-                            </div>
-                            <div>
-                                <label for="sesoi_bound">SESOI (≠ 0)</label>
-                                <input type="number" id="sesoi_bound" value="0.01" step=0.005>
-                            </div>
-                        </div>
-                        <div id="tost_param">
-                            <h3>Parameters for TOST</h3>
-                            <div>
-                                <label for="tost_upper_bound"><a class="glossaryLink" title="Upper bound is set to (control + upper_bound_offset)">Upper bound offset</a></label>
-                                <input type="number" id="tost_upper_bound" value="0.1" step=0.01 min=0.0>
-                            </div>
-                            <div>
-                                <label for="tost_lower_bound"><a class="glossaryLink" title="Lower bound is set to (control - |lower_bound_offset|)">Lower bound offset</a></label>
-                                <input type="number" id="tost_lower_bound" value="-0.1" step=0.01 max=0.0>
-                            </div>
+                            <input type="radio" id="two_sided" name="test_type" value="two_sided">
+                            <label for="Two-sided t-test">Two-sided t-test</label>
                         </div>
                     </div>
                 </div>
-                
+
                 <!--<input type="button" id="create" value="Calculate beta table" onclick="execCalcBeta(); "/>-->
             </div>
 
@@ -587,28 +436,7 @@
         <div class="row">
             <div class="column">
                 <h2>Q&A</h2>
-                <ul>
-                    <li>
-                        <p>Q: What is a t-test with SESOI (smallest effect size of interest)? When should I use it?</p>
-                        <p>
-                            A: It is a t-test with a more stringent rule about what is considered a meaningful change. <br/><br/>
-                            You can use it to verify a particular effect. 
-                            For example, if you set SESOI to 0.05, and choose "verify", the question it asks is "are the cases significantly higher than (controls + 0.05)?".
-                            You can also use "falsify" to prove that there is no significant increase of the said SESOI. 
-                            The question then becomes "are the cases significantly lower than (controls + 0.05)?"
-                            Note that the when SESOI is negative, the "verify" will test for "significantly lower", and so does the "falsify".
-                        </p>
-                    </li>
-                    <li>
-                        <p>Q: What is a TOST test (two one-sided tests for equivalence)? When should I use it?</p>
-                        <p>
-                            A: It tests if the cases are (1) significantly higher than the (controls - |lower_bound|), and (2) lower than the (controls + upper_bound). <br/><br/>
-                            Because simply failing a t-test does not prove that there is no effect, as it can also be because of an insufficient sample size. 
-                            If you want to prove that the difference between the cases and the control are "equivalent", TOST is the simplest choice. <br/><br/>
-                            Note that we assume the false-negative rate is the sum of the false-negative rate of both sides, truncated at 1.
-                        </p>
-                    </li>
-                </ul>
+            
             </div>
         </div>
         <div class="row">
@@ -621,6 +449,7 @@
 </body>
 
 <script>
+    init();
     function openPage(pageName, elmnt, color) {
         // Hide all elements with class="tabcontent" by default */
         var i, tabcontent, tablinks;
@@ -647,45 +476,10 @@
 
         var inputs = document.getElementsByTagName("input"); 
         for (i=0; i<inputs.length; i++){
-            inputs[i].setAttribute('onchange', inputs[i].getAttribute('onchange') + '; plotBeta(); execCalcBeta();');
+            inputs[i].setAttribute('onchange', inputs[i].getAttribute('onchange') + '; execCalcBeta();');
         }
 
-    function displayParams(){
-        if (document.getElementById('sesoi_test').checked){
-            document.getElementById('tost_param').style.display = "none";
-            document.getElementById('sesoi_param').style.display = "block";
-        } else if (document.getElementById('tost_test').checked){
-            document.getElementById('sesoi_param').style.display = "none";
-            document.getElementById('tost_param').style.display = "block";
-        } else{
-            document.getElementById('sesoi_param').style.display = "none";
-            document.getElementById('tost_param').style.display = "none";
-        }
-    }
-
-    function init()
-    {
-        document.getElementById("M0_min").value = 5;
-        document.getElementById("M1_min").value = 5;
-        document.getElementById("M0_max").value = 12;
-        document.getElementById("M1_max").value = 12;
-        document.getElementById("N0").value = 1000;
-        document.getElementById("N1").value = 1000;
-        document.getElementById("a0").value = 7;
-        document.getElementById("a1").value = 10;
-        document.getElementById("b0").value = 10;
-        document.getElementById("b1").value = 7;
-        document.getElementById("alpha").value = 0.05;
-        document.getElementById("beta").value = 0.1;
-        execBetaParamStat(0); 
-        execBetaParamStat(1);
-
-        plotBeta();
-    }
-
-    init();
-    displayParams()
-    execCalcBeta();
+        execCalcBeta();
 </script>
 
 </html>

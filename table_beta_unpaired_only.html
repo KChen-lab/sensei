@@ -24,7 +24,7 @@
         cursor: pointer;
         padding: 8px 16px;
         font-size: 17px;
-        width: 250px;
+        width: 300px;
         height: 40px;
         }
 
@@ -77,20 +77,6 @@
         margin: 3px;
         }
 
-        .column60dummy {
-        flex: 60%;
-        padding: 0px;
-        margin: 0px;
-        }
-
-        .column60 {
-        flex: 60%;
-        border-radius: 10px;
-        border: 2px solid #73AD21;
-        padding: 10px;
-        margin: 3px;
-        }
-
         .column70 {
         flex: 70%;
         border-radius: 10px;
@@ -109,11 +95,6 @@
             display: inline-block;
             width: 250px;
             text-align: left;
-        }
-
-        .block2 {
-            width: 50%;
-            float: left;
         }
 
         input[type=number] {
@@ -169,7 +150,17 @@
         }
 
         function calcBetaRaw(M0, M1, N0, N1, a0, a1, b0, b1, alpha, test_type, offset, sign)
-        {            
+        {
+            N0 = parseFloat(N0);
+            N1 = parseFloat(N1);
+            M0 = parseFloat(M0);
+            M1 = parseFloat(M1);
+            a0 = parseFloat(a0);
+            a1 = parseFloat(a1);
+            b0 = parseFloat(b0);
+            b1 = parseFloat(b1);
+            alpha = parseFloat(alpha);
+            
             Ep0 = a0 / (a0 + b0);
             Ep1 = a1 / (a1 + b1);
             
@@ -177,6 +168,8 @@
             Vp1 = a1 * b1 * (a1 + b1 + N1) / ((N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
 
             Et = (Ep1 - (Ep0 + offset)) / Math.sqrt(Vp0 / M0 + Vp1 / M1);
+
+            console.log(sign);
 
             if (sign == 0) {
                 Et = Math.abs(Et);
@@ -189,7 +182,23 @@
             if (test_type === "one_sided") t_star = jStat.studentt.inv(1 - alpha, nu);
             else t_star = jStat.studentt.inv(1 - alpha / 2, nu);
 
-            console.log("unpaired", M0, M1, Et);
+            return jStat.normal.cdf(t_star - Et, 0, 1)
+        }
+
+        function calcBeta(M0, M1, N0, N1, a0, a1, b0, b1, alpha)
+        {
+            Ep0 = a0 / (a0 + b0);
+            Ep1 = a1 / (a1 + b1);
+            
+            Vp0 = a0 * b0 * (a0 + b0 + N0) / ((N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
+            Vp1 = a1 * b1 * (a1 + b1 + N1) / ((N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
+
+            Et = Math.abs(Ep1 - Ep0) / Math.sqrt(Vp0 / M0 + Vp1 / M1);
+
+            nu = (Vp0 / M0 + Vp1 / M1) ** 2 / ((Vp0 / M0) ** 2 / (M0 - 1) + (Vp1 / M1) ** 2 / (M1 - 1));
+
+            if (test_type === "one_sided") t_star = jStat.studentt.inv(1 - alpha, nu);
+            else t_star = jStat.studentt.inv(1 - alpha / 2, nu);
 
             return jStat.normal.cdf(t_star - Et, 0, 1)
         }
@@ -279,239 +288,11 @@
             }
             output = output + "</table>";
 
+            document.getElementById("M0_min").value
+
             document.getElementById("result").innerHTML = output;
 
             //document.getElementById("results").scrollIntoView();
-        }
-
-        function calcBetaRawPaired(M, N0, N1, a0, a1, b0, b1, alpha, rho, test_type, offset, sign)
-        {
-            Ep0 = a0 / (a0 + b0);
-            Ep1 = a1 / (a1 + b1);
-            
-            Vp0 = a0 * b0 * (a0 + b0 + N0) / ((N0 * (a0 + b0) * (a0 + b0)) * (a0 + b0 + 1));
-            Vp1 = a1 * b1 * (a1 + b1 + N1) / ((N1 * (a1 + b1) * (a1 + b1)) * (a1 + b1 + 1));
-
-            cov = rho * Math.sqrt(a0 * b0 / ((a0 + b0) * (a0 + b0) * (a0 + b0 + 1))) * Math.sqrt(a1 * b1 / ((a1 + b1) * (a1 + b1) * (a1 + b1 + 1)));
-
-            Et = (Ep1 - (Ep0 + offset)) * Math.sqrt(M) / Math.sqrt(Vp0 + Vp1 - 2 * cov);
-
-            if (sign == 0) {
-                Et = Math.abs(Et);
-            } else {
-                Et = sign * Et;
-            }
-
-            nu = M-1;
-
-            if (test_type === "one_sided") t_star = jStat.studentt.inv(1 - alpha, nu);
-            else t_star = jStat.studentt.inv(1 - alpha / 2, nu);
-
-            console.log("paired", M, Et);
-
-            return jStat.normal.cdf(t_star - Et, 0, 1)
-        }
-
-        function execCalcBetaPaired()
-        {
-            var M_min = parseFloat(document.getElementById("M_min_paired").value);
-            var M_max = parseFloat(document.getElementById("M_max_paired").value);
-
-            var N0 = parseFloat(document.getElementById("N0_paired").value);
-            var N1 = parseFloat(document.getElementById("N1_paired").value);
-            var a0 = parseFloat(document.getElementById("a0_paired").value);
-            var a1 = parseFloat(document.getElementById("a1_paired").value);
-            var b0 = parseFloat(document.getElementById("b0_paired").value);
-            var b1 = parseFloat(document.getElementById("b1_paired").value);
-            var alpha = parseFloat(document.getElementById("alpha_paired").value);
-
-            var rho = parseFloat(document.getElementById("rho_paired").value)
-
-            var beta = parseFloat(document.getElementById("beta_paired").value);
-
-            var test_type = "";
-            var sign = 0;
-            var offset = 0.0;
-            var lower_bound = 0.0;
-            var upper_bound = 0.0;
-
-            if (document.getElementById('one_sided_paired').checked) {
-                test_type = "one_sided";
-                sign = 0;
-                offset = 0.0;
-            } else if (document.getElementById('two_sided_paired').checked) {
-                test_type = "two_sided";
-                sign = 0;
-                offset = 0.0;
-            } else if (document.getElementById('sesoi_test_paired').checked) {
-                test_type = "one_sided";
-                offset = parseFloat(document.getElementById("sesoi_bound_paired").value);
-                if (offset == 0) {
-                    //document.getElementById("result").innerHTML = "<p>Invalid input: SESOI must not be zero.</p>"; 
-                    //return;
-                }
-                if (document.getElementById('sesoi_verify_paired').checked) sign = Math.sign(offset);
-                else sign = -Math.sign(offset);
-            } else if (document.getElementById('tost_test_paired').checked) {
-                test_type = "one_sided";
-                lower_bound = parseFloat(document.getElementById("tost_lower_bound_paired").value);
-                upper_bound = parseFloat(document.getElementById("tost_upper_bound_paired").value);
-            } else {
-                return; // do nothing.
-            }
-
-            var output = "<table class='w3-table' border='1' width='500' cellspacing='0'cellpadding='5'>";
-
-            output = output + "<tr>";
-            output = output + "<td>" + "Sample Size" + "</td>";
-
-            var temp = 1.0;
-
-            for (j = M_min; j <= M_max; j++)
-            {
-                output = output + "<td>" + j + "</td>";
-            }
-            output = output + "</tr>";
-
-            output = output + "<tr>";
-            output = output + "<td>False Negative Rate</td>";
-
-            for (j = M_min; j <= M_max; j++)
-            {   
-                if (document.getElementById('tost_test_paired').checked) {
-                    temp = Math.min((calcBetaRawPaired(j, N0, N1, a0, a1, b0, b1, alpha, rho, test_type, upper_bound, -1) + 
-                                     calcBetaRawPaired(j, N0, N1, a0, a1, b0, b1, alpha, rho, test_type, lower_bound, 1)), 
-                                1);
-                } else {
-                    temp = calcBetaRawPaired(j, N0, N1, a0, a1, b0, b1, alpha, rho, test_type, offset, sign);
-                }
-                if (temp < beta) output = output + "<td bgcolor=#E0E0E0>" + round(temp, 3) + "</td>";
-                else output = output + "<td>" + round(temp, 3) + "</td>";
-            }
-            output = output + "</tr>";
-
-            output = output + "</table>";
-
-            document.getElementById("result_paired").innerHTML = output;
-
-            //document.getElementById("results").scrollIntoView();
-        }
-
-        function plotBetaPaired()
-        {
-            var a0 = parseFloat(document.getElementById("a0_paired").value);
-            var a1 = parseFloat(document.getElementById("a1_paired").value);
-            var b0 = parseFloat(document.getElementById("b0_paired").value);
-            var b1 = parseFloat(document.getElementById("b1_paired").value);
-
-            x = [];
-            y = [];
-            for (i = 0.0; i <= 1.0; i = i + 0.005) x.push(i);
-            for (i = 0; i < x.length; i++) y.push(jStat.beta.pdf(x[i], a1, b1))
-            var exp = {
-                x: x,
-                y: y,
-                type: 'scatter',
-                name: 'Experimental'
-            };
-
-            if (document.getElementById('one_sided_paired').checked || document.getElementById('two_sided_paired').checked) {
-                y = [];
-                for (i = 0; i < x.length; i++) y.push(jStat.beta.pdf(x[i], a0, b0));
-                var ctrl = {
-                    x: x,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Control'
-                };
-                var data = [ctrl, exp];
-            } else if (document.getElementById('sesoi_test_paired').checked) {
-                offset = parseFloat(document.getElementById("sesoi_bound_paired").value);
-                
-                y = [];
-                x1 = [];
-                for (i = 0; i < x.length; i++) {
-                    y.push(jStat.beta.pdf(x[i], a0, b0));
-                    x1.push(x[i] + offset);
-                }
-                var ctrl = {
-                    x: x,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Control'
-                };
-
-                var sesoi = {
-                    x: x1,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Control with SESOI',
-                    line: {
-                        dash: 'dot',
-                        color: '#1f77b4'
-                    }
-                };
-
-                var data = [ctrl, exp, sesoi];
-
-            } else if (document.getElementById('tost_test_paired').checked) {
-                lower_bound = parseFloat(document.getElementById("tost_lower_bound_paired").value);
-                upper_bound = parseFloat(document.getElementById("tost_upper_bound_paired").value);
-
-                y = [];
-                x1 = [];
-                x2 = [];
-                for (i = 0; i < x.length; i++) {
-                    y.push(jStat.beta.pdf(x[i], a0, b0));
-                    x1.push(x[i] + lower_bound);
-                    x2.push(x[i] + upper_bound);
-                }
-                var ctrl = {
-                    x: x,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Control'
-                };
-
-                var lb = {
-                    x: x1,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Lower',
-                    line: {
-                        dash: 'dot',
-                        color: '#1f77b4'
-                    }
-                };
-
-                var ub = {
-                    x: x2,
-                    y: y,
-                    type: 'scatter',
-                    name: 'Upper',
-                    line: {
-                        dash: 'dash',
-                        color: '#1f77b4'
-                    }
-                };
-
-                var data = [ctrl, exp, lb, ub];
-
-            } else {
-                return; // do nothing.
-            }
-
-            var layout = {showlegend: true, legend: {"orientation": "h"}, height: 300, width: 400,
-            margin: {
-                    l: 50,
-                    r: 50,
-                    b: 50,
-                    t: 50,
-                    pad: 4
-                }
-            };
-
-            Plotly.newPlot('plot_paired', data, layout)
         }
 
         function plotBeta()
@@ -631,11 +412,12 @@
             Plotly.newPlot('plot', data, layout)
         }
 
+
+
   </script>
 </head>     
 <body>
-    <button class="tablink" onclick="openPage('main', this, 'green')" id="defaultOpen">Unpaired t-Test</button>
-    <button class="tablink" onclick="openPage('paired', this, 'green')">Paired t-Test</button>
+    <button class="tablink" onclick="openPage('main', this, 'green')" id="defaultOpen">Power Estimation</button>
     <button class="tablink" onclick="openPage('instructions', this, 'green')">Instructions</button>
 
     <div class="tabcontent" id="main">
@@ -785,167 +567,8 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="tabcontent" id="paired">
-        <div class="row">
-            <div class="column60dummy">
-                <div class = "row">
-                    <div class="column60">
-                        <div class="block2">
-                            <label for="">Range of samples M</label>
-                            <input type="number" id="M_min_paired" value="" style="width: 45px;">
-                            ~
-                            <input type="number" id="M_max_paired" value="" style="width: 45px;">
-                        </div>
-                        <div class="block2">
-                            <label for="rho_paired">Correlation 𝜌</label>
-                            <input type="number" id="rho_paired" value="" step="0.05">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="column30">
-                        <h2>Control group</h2>
-
-                        <div class="block">
-                            <label for="N0_paired">Number of cells N<sub>0</sub></label>
-                            <input type="number" id="N0_paired" value="" step=100>
-                        </div>
-                        <h3>Beta distribution</h3>
-                        <h4><b>Specify</b> Mean and variance</h4>
-                        <div class="block">
-                            <label for="mean0_paired">Mean</label>
-                            <input type="number" id="mean0_paired" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam('0_paired');">
-                        </div>
-                        <div class="block">
-                            <label for="std0_paired">Standard deviation</label>
-                            <input type="number" id="std0_paired" value="" step="0.01" min="0.001" onchange="execBetaStatParam('0_paired');">
-                        </div>
-                        <h4><b>or</b> a<sub>0</sub> and b<sub>0</sub></h4>
-                        <div class="block">
-                            Beta(a<sub>0</sub> = 
-                            <input type="number" id="a0_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('0_paired');">
-                            , b<sub>0</sub> = 
-                            <input type="number" id="b0_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('0_paired');">
-                            )
-                        </div>
-                    </div>
-        
-                    <div class="column30">
-                        <h2>Experimental group</h2>
-                        <div class="block">
-                            <label for="N1_paired">Number of cells N<sub>1</sub></label>
-                            <input type="number" id="N1_paired" value="" step=100>
-                        </div>
-                        <h3>Beta distribution</h3>
-                        <h4><b>Specify</b> Mean and variance</h4>
-                        <div class="block">
-                            <label for="mean1_paired">Mean</label>
-                            <input type="number" id="mean1_paired" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam('1_paired');">
-                        </div>
-                        <div class="block">
-                            <label for="std1_paired">Standard deviation</label>
-                            <input type="number" id="std1_paired" value="" step="0.01" min="0.001" onchange="execBetaStatParam('1_paired');">
-                        </div>
-                        <h4><b>or</b> a<sub>1</sub> and b<sub>1</sub></h4>
-                        <div class="block">
-                            Beta(a<sub>1</sub> = 
-                            <input type="number" id="a1_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('1_paired');">
-                            , b<sub>1</sub> = 
-                            <input type="number" id="b1_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('1_paired');">
-                            )
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-                
-            <div class="column40">
-                <h2>Visualize Beta-distributions</h2>
-                <div id='plot_paired'><!-- Plotly chart will be drawn inside this DIV --></div>
-                <div>The graph will update when the Beta-distributions change.</div>
-            </div>
-        </div>
-        
-
-        <div class="row">
-            <div class="column30">
-                <h2>Statistical Test</h2>
-                <div>
-                    <div class="block">
-                        <label for="alpha_paired">False positive rate α</label>
-                        <input type="number" id="alpha_paired" value="" step=0.01>
-                    </div>
-                    <div class="block">
-                        <label for="beta_paired">False negative threshold β<sub>th</sub></label>
-                        <input type="number" id="beta_paired" value="" step=0.01>
-                    </div>
-                    <div>
-                        <h3>Type</h3>
-                        <div>
-                            <input type="radio" id="one_sided_paired" name="test_type_paired" value="one_sided" onchange="displayParamsPaired();" checked>
-                            <label class="radio" for="one_sided_paired">One-sided t-test</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="two_sided_paired" name="test_type_paired" value="two_sided" onchange="displayParamsPaired();">
-                            <label class="radio" for="two_sided_paired">Two-sided t-test</label>
-                        </div>
-                        <div>
-                            <input type="radio" id="sesoi_test_paired" name="test_type_paired" value="sesoi_test" onchange="displayParamsPaired();">
-                            <label class="radio" for="sesoi_test_paired">t-Test with <a class="glossaryLink" title="SESOI: smallest effect size of interest">SESOI</a></label>
-                        </div>
-                        <div>
-                            <input type="radio" id="tost_test_paired" name="test_type_paired" value="sesoi_test" onchange="displayParamsPaired();">
-                            <label class="radio" for="tost_test_paired"><a class="glossaryLink" title="TOST: two one-sided t-tests">TOST</a> for equivalence</label>
-                        </div>
-                        <div id="sesoi_param_paired">
-                            <h3>Parameters for SESOI</h3>
-                            <div>
-                                <input type="radio" id="sesoi_verify_paired" name="sesoi_type_paired" value="sesoi_verify" checked>
-                                <label class="radio" for="sesoi_verify"><a class="glossaryLink" title="test if the effect is significantly greater than specified">Verify</a></label>
-                            </div>
-                            <div>
-                                <input type="radio" id="sesoi_falsify_paired" name="sesoi_type_paired" value="sesoi_falsify">
-                                <label class="radio" for="sesoi_falsify"><a class="glossaryLink" title="test if the effect is significantly smaller than specified">Falsify</a></label>
-                            </div>
-                            <div>
-                                <label for="sesoi_bound_paired">SESOI (≠ 0)</label>
-                                <input type="number" id="sesoi_bound_paired" value="0.01" step=0.005>
-                            </div>
-                        </div>
-                        <div id="tost_param_paired">
-                            <h3>Parameters for TOST</h3>
-                            <div>
-                                <label for="tost_upper_bound_paired"><a class="glossaryLink" title="Upper bound is set to (control + upper_bound_offset)">Upper bound offset</a></label>
-                                <input type="number" id="tost_upper_bound_paired" value="0.1" step=0.01 min=0.0>
-                            </div>
-                            <div>
-                                <label for="tost_lower_bound_paired"><a class="glossaryLink" title="Lower bound is set to (control - |lower_bound_offset|)">Lower bound offset</a></label>
-                                <input type="number" id="tost_lower_bound_paired" value="-0.1" step=0.01 max=0.0>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!--<input type="button" id="create" value="Calculate beta table" onclick="execCalcBeta(); "/>-->
-            </div>
-
-            <div class="column70">
-                <h2>Result: False-negative rate β</h2>
-                <div>
-                    <div id="result_paired">
-                        Results pending calculating...
-                    </div>
-                </div>
-                <div>False negative rates. Lower is better. Each row correponds to a fixed number of control samples.
-                     Each row correponds to a fixed number of experimental samples. Values pass β<sub>th</sub> are colored in gray.
-                </div>
-            </div>
-        </div>
 
     </div>
-
     <div class="tabcontent" id="instructions">
         <div class="row">
             <div class="column">
@@ -1024,8 +647,7 @@
 
         var inputs = document.getElementsByTagName("input"); 
         for (i=0; i<inputs.length; i++){
-            if (inputs[i].getAttribute('id').slice(-7) === '_paired') inputs[i].setAttribute('onchange', inputs[i].getAttribute('onchange') + '; plotBetaPaired(); execCalcBetaPaired();');
-            else inputs[i].setAttribute('onchange', inputs[i].getAttribute('onchange') + '; plotBeta(); execCalcBeta();');
+            inputs[i].setAttribute('onchange', inputs[i].getAttribute('onchange') + '; plotBeta(); execCalcBeta();');
         }
 
     function displayParams(){
@@ -1038,19 +660,6 @@
         } else{
             document.getElementById('sesoi_param').style.display = "none";
             document.getElementById('tost_param').style.display = "none";
-        }
-    }
-
-    function displayParamsPaired(){
-        if (document.getElementById('sesoi_test_paired').checked){
-            document.getElementById('tost_param_paired').style.display = "none";
-            document.getElementById('sesoi_param_paired').style.display = "block";
-        } else if (document.getElementById('tost_test_paired').checked){
-            document.getElementById('sesoi_param_paired').style.display = "none";
-            document.getElementById('tost_param_paired').style.display = "block";
-        } else{
-            document.getElementById('sesoi_param_paired').style.display = "none";
-            document.getElementById('tost_param_paired').style.display = "none";
         }
     }
 
@@ -1068,31 +677,15 @@
         document.getElementById("b1").value = 7;
         document.getElementById("alpha").value = 0.05;
         document.getElementById("beta").value = 0.1;
-        execBetaParamStat('0'); 
-        execBetaParamStat('1');
-        plotBeta();
+        execBetaParamStat(0); 
+        execBetaParamStat(1);
 
-        document.getElementById("M_min_paired").value = 5;
-        document.getElementById("M_max_paired").value = 12;
-        document.getElementById("N0_paired").value = 1000;
-        document.getElementById("N1_paired").value = 1000;
-        document.getElementById("a0_paired").value = 7;
-        document.getElementById("a1_paired").value = 10;
-        document.getElementById("b0_paired").value = 10;
-        document.getElementById("b1_paired").value = 7;
-        document.getElementById("alpha_paired").value = 0.05;
-        document.getElementById("beta_paired").value = 0.1;
-        document.getElementById("rho_paired").value = 0.5;
-        execBetaParamStat('0_paired'); 
-        execBetaParamStat('1_paired');
-        plotBetaPaired();
+        plotBeta();
     }
 
     init();
     displayParams()
-    displayParamsPaired()
     execCalcBeta();
-    execCalcBetaPaired();
 </script>
 
 </html>

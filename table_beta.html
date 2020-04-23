@@ -325,7 +325,7 @@
             var b1 = parseFloat(document.getElementById("b1_paired").value);
             var alpha = parseFloat(document.getElementById("alpha_paired").value);
 
-            var rho = parseFloat(document.getElementById("rho_paired").value)
+            var rho = parseFloat(document.getElementById("rho_paired").value);
 
             var beta = parseFloat(document.getElementById("beta_paired").value);
 
@@ -403,7 +403,7 @@
             var a1 = parseFloat(document.getElementById("a1_paired").value);
             var b0 = parseFloat(document.getElementById("b0_paired").value);
             var b1 = parseFloat(document.getElementById("b1_paired").value);
-
+            var rho = parseFloat(document.getElementById("rho_paired").value);
             x = [];
             y = [];
             for (i = 0.0; i <= 1.0; i = i + 0.005) x.push(i);
@@ -792,6 +792,7 @@
             <div class="column60dummy">
                 <div class = "row">
                     <div class="column60">
+                        <h2>Pre- and post-treatment</h2>
                         <div class="block2">
                             <label for="">Range of samples M</label>
                             <input type="number" id="M_min_paired" value="" style="width: 45px;">
@@ -806,7 +807,7 @@
                 </div>
                 <div class="row">
                     <div class="column30">
-                        <h2>Control group</h2>
+                        <h2>Pre-treatment</h2>
 
                         <div class="block">
                             <label for="N0_paired">Number of cells N<sub>0</sub></label>
@@ -833,7 +834,7 @@
                     </div>
         
                     <div class="column30">
-                        <h2>Experimental group</h2>
+                        <h2>Post-treatment</h2>
                         <div class="block">
                             <label for="N1_paired">Number of cells N<sub>1</sub></label>
                             <input type="number" id="N1_paired" value="" step=100>
@@ -862,7 +863,7 @@
             
                 
             <div class="column40">
-                <h2>Visualize Beta-distributions</h2>
+                <h2>Visualization</h2>
                 <div id='plot_paired'><!-- Plotly chart will be drawn inside this DIV --></div>
                 <div>The graph will update when the Beta-distributions change.</div>
             </div>
@@ -951,7 +952,8 @@
             <div class="column">
                 <h2>Instructions</h2>
                 <ol>
-                    <li>Set range of M<sub>0</sub> and M<sub>1</sub>, i.e., the numbers of samples in control group and experimental group, respectively.</li>
+                    <li>For unpaired test, set range of M<sub>0</sub> and M<sub>1</sub>, i.e., the numbers of samples in control group and experimental group, respectively. 
+                        For paired test, set range of M and correlation between two samples.</li>
                     <li>Set N<sub>0</sub> and N<sub>1</sub> for number of cells in each sample for each group. (Total number of cells = M<sub>0</sub>N<sub>0</sub> + M<sub>1</sub>N<sub>1</sub>) </li>
                     <li>Set mean and standard deviation for proportion of a cell type. This corresponds to variances among samples in a group. <b>Alternatively</b>, set a and b for each beta distribution.</li>
                     <li>Set α, it is the threshold for a significant p-value. 0.05 and 0.01 are commonly used.</li>
@@ -965,6 +967,13 @@
             <div class="column">
                 <h2>Q&A</h2>
                 <ul>
+                    <li>
+                        <p>Q: How to set correlation for paired t-test?</p>
+                        <p>A: It should be determined on a case by case basis. 
+                            We have calculated the correlation between immune cell types in solid tissue normal and primary solid tumor in TCGA data deconvolved by CIBERSORT.
+                            Please refer to the <a href='image/corr.png'>correlation</a> and <a href='image/conf.png'>95% confidence interval</a>.
+                        </p>
+                    </li>
                     <li>
                         <p>Q: What is a t-test with SESOI (smallest effect size of interest)? When should I use it?</p>
                         <p>

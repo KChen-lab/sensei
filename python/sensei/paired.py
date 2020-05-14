@@ -56,8 +56,11 @@ def calc_fn_rate(M, N, m, s, rho, alpha, test_type, offset, sign):
 
     a = [None, None]
     b = [None, None]
-    a[0], b[0] = normal_to_beta(m[0], s[0])
-    a[1], b[1] = normal_to_beta(m[1], s[1])
+    try:
+        a[0], b[0] = normal_to_beta(m[0], s[0])
+        a[1], b[1] = normal_to_beta(m[1], s[1])
+    except ZeroDivisionError:
+        return float("nan")
 
     return calc_fn_rate_beta(M, N, a, b, rho, alpha, test_type, offset, sign)
 

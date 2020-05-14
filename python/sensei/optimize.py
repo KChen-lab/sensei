@@ -1,5 +1,6 @@
 from . import unpaired
 from . import paired
+from . import utils
 
 def find_minimum_M(max_M, N, m, s, rho=None, alpha=0.05, beta=0.1, design='unpaired', test_type="one-sided", offset=0,
                    sign=0):
@@ -26,11 +27,13 @@ def find_minimum_M(max_M, N, m, s, rho=None, alpha=0.05, beta=0.1, design='unpai
     else:
         raise ValueError("Unknown study design")
 
-    M = 3
-    while test_M(M) > beta:
-        if M > max_M:
-            return -1
-        else:
-            M += 1
+    #while test_M(M) > beta:
+    #    if M > max_M:
+    #        return -1
+    #    else:
+    #        M += 1
 
-    return M
+    min_M = 3
+    res = utils.f_upper_bound(test_M, 0, min_M, max_M + 1, beta)
+
+    return res if res <= max_M else float('nan')

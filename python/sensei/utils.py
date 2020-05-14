@@ -1,4 +1,9 @@
 def is_iterable(x):
+    """
+
+    :param x:
+    :return:
+    """
     try:
         iterator = iter(x)
     except TypeError:
@@ -8,6 +13,12 @@ def is_iterable(x):
 
 
 def normal_to_beta(m, s):
+    """
+    Reparametrize
+    :param m:
+    :param s:
+    :return:
+    """
     v = s ** 2
     a = ((1 - m) / v - 1 / m) * (m ** 2)
     b = a * (1 / m - 1)
@@ -15,6 +26,12 @@ def normal_to_beta(m, s):
 
 
 def beta_to_normal(a, b):
+    """
+    Reparametrize
+    :param a:
+    :param b:
+    :return:
+    """
     m = a / (a + b)
     v = a * b / (a + b) ** 2 / (a + b + 1)
     return m, v ** .5
@@ -66,8 +83,30 @@ def f_bound(f, key, first, last, value, which, *args, **kwargs):
 
 
 def f_lower_bound(f, key, first, last, value, *args, **kwargs):
+    """
+
+    :param f:
+    :param key:
+    :param first:
+    :param last:
+    :param value:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     return f_bound(f, key, first, last, value, "lower", *args, **kwargs)
 
 
 def f_upper_bound(f, key, first, last, value, *args, **kwargs):
+    """
+
+    :param f:
+    :param key:
+    :param first:
+    :param last:
+    :param value:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     return f_bound(f, key, first, last, value, "upper", *args, **kwargs)

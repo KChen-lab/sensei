@@ -3,6 +3,18 @@ from .utils import *
 
 
 def calc_fn_rate_beta(M, N, a, b, alpha=0.05, test_type="one-sided", offset=0, sign=0):
+    """
+
+    :param M:
+    :param N:
+    :param a:
+    :param b:
+    :param alpha:
+    :param test_type:
+    :param offset:
+    :param sign:
+    :return:
+    """
     Ep = [a[0] / (a[0] + b[0]),
           a[1] / (a[1] + b[1])]
 
@@ -28,6 +40,18 @@ def calc_fn_rate_beta(M, N, a, b, alpha=0.05, test_type="one-sided", offset=0, s
 
 
 def calc_fn_rate(M, N, m, s, alpha, test_type, offset, sign):
+    """
+
+    :param M:
+    :param N:
+    :param m:
+    :param s:
+    :param alpha:
+    :param test_type:
+    :param offset:
+    :param sign:
+    :return:
+    """
     a = [None, None]
     b = [None, None]
     a[0], b[0] = normal_to_beta(m[0], s[0])
@@ -80,6 +104,18 @@ def calc_fn_rate_beta(M, N, a, b, alpha=0.05, test_type="one-sided", offset=0, s
 
 
 def calc_fn_rate(M, N, m, s, alpha, test_type, offset, sign):
+    """
+
+    :param M:
+    :param N:
+    :param m:
+    :param s:
+    :param alpha:
+    :param test_type:
+    :param offset:
+    :param sign:
+    :return:
+    """
     if not is_iterable(s):
         s = [s, s]
 

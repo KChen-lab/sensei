@@ -1,3 +1,13 @@
+epsilon = 1e-12
+
+def regularize(x):
+    if x < epsilon:
+        return epsilon
+    elif x > 1 - epsilon:
+        return 1 - epsilon
+    else:
+        return x
+
 def is_iterable(x):
     """
 
@@ -19,6 +29,9 @@ def normal_to_beta(m, s):
     :param s:
     :return:
     """
+    m = regularize(m)
+    s = regularize(s)
+
     v = s ** 2
     a = ((1 - m) / v - 1 / m) * (m ** 2)
     b = a * (1 / m - 1)
@@ -110,3 +123,10 @@ def f_upper_bound(f, key, first, last, value, *args, **kwargs):
     :return:
     """
     return f_bound(f, key, first, last, value, "upper", *args, **kwargs)
+
+
+def var_betabinom_over_n(n, a, b):
+    conf = a + b
+    return a * b * (conf + n) / (n * conf ** 2 * (conf + 1))
+
+

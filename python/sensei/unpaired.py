@@ -15,65 +15,8 @@ def calc_fn_rate_beta(M, N, a, b, alpha=0.05, test_type="one-sided", offset=0, s
     :param sign:
     :return:
     """
-    Ep = [a[0] / (a[0] + b[0]),
-          a[1] / (a[1] + b[1])]
 
-    Vp = [a[0] * b[0] * (a[0] + b[0] + N[0]) / ((N[0] * (a[0] + b[0]) * (a[0] + b[0])) * (a[0] + b[0] + 1)),
-          a[1] * b[1] * (a[1] + b[1] + N[1]) / ((N[1] * (a[1] + b[1]) * (a[1] + b[1])) * (a[1] + b[1] + 1))]
-
-    Et = (Ep[1] - (Ep[0] + offset)) / (Vp[0] / M[0] + Vp[1] / M[1]) ** .5
-
-    if sign == 0:
-        Et = abs(Et)
-    else:
-        Et = sign * Et
-
-    nu = (Vp[0] / M[0] + Vp[1] / M[1]) ** 2 / ((Vp[0] / M[0]) ** 2 / (M[0] - 1) + (Vp[1] / M[1]) ** 2 / (M[1] - 1))
-
-    if test_type == "one-sided":
-        t_star = scipy.stats.t.ppf(q=1 - alpha, df=nu)
-    elif test_type == "two-sided":
-        t_star = scipy.stats.t.ppf(q=1 - alpha / 2, df=nu)
-    else:
-        raise ValueError("test must be one-sided or two-sided")
-    return scipy.stats.norm.cdf(t_star - Et, loc=0, scale=1)
-
-
-def calc_fn_rate(M, N, m, s, alpha, test_type, offset, sign):
-    """
-
-    :param M:
-    :param N:
-    :param m:
-    :param s:
-    :param alpha:
-    :param test_type:
-    :param offset:
-    :param sign:
-    :return:
-    """
-    a = [None, None]
-    b = [None, None]
-    a[0], b[0] = normal_to_beta(m[0], s[0])
-    a[1], b[1] = normal_to_beta(m[1], s[1])
-
-    return calc_fn_rate_beta(M, N, a, b, alpha, test_type, offset, sign)
-
-
-def calc_fn_rate_beta(M, N, a, b, alpha=0.05, test_type="one-sided", offset=0, sign=0):
-    """
-
-    :param M:
-    :param N:
-    :param a:
-    :param b:
-    :param alpha:
-    :param test_type:
-    :param offset:
-    :param sign:
-    :return:
-    """
-    if not is_iterable(N):
+    if not is_iterable(M):
         M = [M, M]
 
     if not is_iterable(N):
@@ -82,8 +25,10 @@ def calc_fn_rate_beta(M, N, a, b, alpha=0.05, test_type="one-sided", offset=0, s
     Ep = [a[0] / (a[0] + b[0]),
           a[1] / (a[1] + b[1])]
 
-    Vp = [a[0] * b[0] * (a[0] + b[0] + N[0]) / ((N[0] * (a[0] + b[0]) * (a[0] + b[0])) * (a[0] + b[0] + 1)),
-          a[1] * b[1] * (a[1] + b[1] + N[1]) / ((N[1] * (a[1] + b[1]) * (a[1] + b[1])) * (a[1] + b[1] + 1))]
+    # Vp = [a[0] * b[0] * (a[0] + b[0] + N[0]) / ((N[0] * (a[0] + b[0]) * (a[0] + b[0])) * (a[0] + b[0] + 1)),
+    #      a[1] * b[1] * (a[1] + b[1] + N[1]) / ((N[1] * (a[1] + b[1]) * (a[1] + b[1])) * (a[1] + b[1] + 1))]
+
+    Vp = [var_betabinom_over_n(N[0], a[0], b[0]), var_betabinom_over_n(N[1], a[1], b[1])]
 
     Et = (Ep[1] - (Ep[0] + offset)) / (Vp[0] / M[0] + Vp[1] / M[1]) ** .5
 
@@ -130,3 +75,103 @@ def calc_fn_rate(M, N, m, s, alpha, test_type, offset, sign):
     return calc_fn_rate_beta(M, N, a, b, alpha, test_type, offset, sign)
 
 
+def calc_fn_rate_override(M, N, m, s, alpha, test_type, override_diff):
+    """
+
+    :param M:
+    :param N:
+    :param m:
+    :param s:
+    :param alpha:
+    :param test_type:
+    :param override_diff: overriden difference
+    :return:
+    """
+    if not is_iterable(s):
+        s = [s, s]
+
+    a = [None, None]
+    b = [None, None]
+
+    try:
+        a[0], b[0] = normal_to_beta(m[0], s[0])
+        a[1], b[1] = normal_to_beta(m[1], s[1])
+    except ZeroDivisionError:
+        return float("nan")
+
+    if not is_iterable(M):
+        M = [M, M]
+
+    if not is_iterable(N):
+        N = [N, N]
+
+    Ep = [a[0] / (a[0] + b[0]),
+          a[1] / (a[1] + b[1])]
+
+    # Vp = [a[0] * b[0] * (a[0] + b[0] + N[0]) / ((N[0] * (a[0] + b[0]) * (a[0] + b[0])) * (a[0] + b[0] + 1)),
+    #       a[1] * b[1] * (a[1] + b[1] + N[1]) / ((N[1] * (a[1] + b[1]) * (a[1] + b[1])) * (a[1] + b[1] + 1))]
+
+    Vp = [var_betabinom_over_n(N[0], a[0], b[0]), var_betabinom_over_n(N[1], a[1], b[1])]
+
+    Et = override_diff / (Vp[0] / M[0] + Vp[1] / M[1]) ** .5
+
+    Et = abs(Et)
+
+    nu = (Vp[0] / M[0] + Vp[1] / M[1]) ** 2 / ((Vp[0] / M[0]) ** 2 / (M[0] - 1) + (Vp[1] / M[1]) ** 2 / (M[1] - 1))
+
+    if test_type == "one-sided":
+        t_star = scipy.stats.t.ppf(q=1 - alpha, df=nu)
+    elif test_type == "two-sided":
+        t_star = scipy.stats.t.ppf(q=1 - alpha / 2, df=nu)
+    else:
+        raise ValueError("test must be one-sided or two-sided")
+    return scipy.stats.norm.cdf(t_star - Et, loc=0, scale=1)
+
+
+def calc_fn_rate_baseline(M, m, s, alpha, test_type, offset, sign):
+    """
+
+    :param M:
+    :param N:
+    :param m:
+    :param s:
+    :param alpha:
+    :param test_type:
+    :param override_diff: overriden difference
+    :return:
+    """
+    if not is_iterable(s):
+        s = [s, s]
+
+    a = [None, None]
+    b = [None, None]
+
+    try:
+        a[0], b[0] = normal_to_beta(m[0], s[0])
+        a[1], b[1] = normal_to_beta(m[1], s[1])
+    except ZeroDivisionError:
+        return float("nan")
+
+    if not is_iterable(M):
+        M = [M, M]
+
+    Ep = m
+
+    Vp = [s[0] ** 2, s[1] ** 2]
+
+    Et = (Ep[1] - (Ep[0] + offset)) / (Vp[0] / M[0] + Vp[1] / M[1]) ** .5
+
+    if sign == 0:
+        Et = abs(Et)
+    else:
+        Et = sign * Et
+
+    nu = (Vp[0] / M[0] + Vp[1] / M[1]) ** 2 / ((Vp[0] / M[0]) ** 2 / (M[0] - 1) + (Vp[1] / M[1]) ** 2 / (M[1] - 1))
+
+    if test_type == "one-sided":
+        t_star = scipy.stats.t.ppf(q=1 - alpha, df=nu)
+    elif test_type == "two-sided":
+        t_star = scipy.stats.t.ppf(q=1 - alpha / 2, df=nu)
+    else:
+        raise ValueError("test must be one-sided or two-sided")
+    return scipy.stats.norm.cdf(t_star - Et, loc=0, scale=1)

@@ -160,7 +160,7 @@ def calc_fn_rate_baseline(M, m, s, rho, alpha, test_type, offset, sign):
         else:
             raise ValueError("Two groups must have the same samples size for paired test.")
 
-    cov = rho
+    cov = rho * s[0] * s[1]
 
     Ep = m
 

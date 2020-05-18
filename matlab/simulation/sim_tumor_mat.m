@@ -1,3 +1,6 @@
+clear;
+
+%%
 
 opts = spreadsheetImportOptions("NumVariables", 125);
 
@@ -13,36 +16,49 @@ opts = setvaropts(opts, [1, 3], "WhitespaceRule", "preserve");
 opts = setvaropts(opts, [1, 2, 3, 124, 125], "EmptyFieldRule", "auto");
 
 % Import the data
-data = readtable("1-s2.0-S0092867419302673-mmc5.xlsx", opts, "UseExcel", false)
+data = readtable("1-s2.0-S0092867419302673-mmc5.xlsx", opts, "UseExcel", false);
 
 clear opts
+
+%%
+rng(0);
 
 tumor = data.TCells(data.Tissue == "Tumor") / 100;
 juxta = data.TCells(data.Tissue == "Juxta-tumoral") / 100;
 
-[R, P] = ttest2(tumor, juxta)
+[R, P] = ttest2(tumor, juxta);
 
-tumor_train = tumor(1 : 50);
-tumor_test = tumor(50 + 1 : end);
+%k = randperm(size(tumor,1));
 
-juxta_train = juxta(1 : 15);
-juxta_test = juxta(15 + 1 : end);
+tumor_train = tumor;%(k(1 : 50));
+tumor_test = tumor;%(k(50 + 1 : end));
 
-mu1 = mean(tumor_train)
-mu0 = mean(juxta_train)
+%k = randperm(size(juxta,1));
+juxta_train = juxta;%(k(1 : 15));
+juxta_test = juxta;%(k(15 + 1 : end));
 
-sigma1 = std(tumor_train)
-sigma0 = std(juxta_train)
+mu1 = mean(tumor_train);
+mu0 = mean(juxta_train);
 
-N0 = 1000
-N1 = 1000
+sigma1 = std(tumor_train);
+sigma0 = std(juxta_train);
 
-res_mat0 = table();
-res_mat1 = table();
+%%
+alpha = 0.05;
 
-for M1 = 12:2:20
-    for M0 = 12:2:20
+N0 = 100;
+N1 = 100;
 
+res_mat0 = [];
+res_mat1 = [];
+
+M_list = 12:2:20;
+
+for i_M0 = 1 : length(M_list)
+    for i_M1 = 1 : length(M_list)
+        M0 = M_list(i_M0);
+        M1 = M_list(i_M1);
+        
         a1 = ((1 - mu1) / sigma1 / sigma1 - 1 / mu1) * mu1 * mu1;
         b1 = a1 * (1 / mu1 - 1);
 
@@ -60,14 +76,22 @@ for M1 = 12:2:20
         nu = sum(Vp ./ M) ^ 2 / sum((Vp ./ M) .^ 2 ./ (M - 1));
         Et = abs(diff(Ep)) / sqrt(sum(Vp ./ M));
 
-        t_star = tinv(1 - alpha ./ 2, nu);
+        t_star = tinv(1 - alpha, nu);
 
-        res_mat0(M0, M1) = normcdf(t_star - Et);
+        % res_mat0(M0, M1) = normcdf(t_star - Et);
+        res_mat0(i_M0, i_M1) = tcdf(t_star - Et, nu);
+        
+        Ep = [mu0 mu1];
+        Vp = [sigma0 ^ 2, sigma1 ^ 2];
 
+        nu = sum(Vp ./ M) ^ 2 / sum((Vp ./ M) .^ 2 ./ (M - 1));
+        Et = abs(diff(Ep)) / sqrt(sum(Vp ./ M));
 
+        t_star = tinv(1 - alpha, nu);
+        
+        res_mat1(i_M0, i_M1) = tcdf(t_star - Et, nu);
 
-        rng(0);
-        N_ITER = 1000;
+        N_ITER = 5000;
         P = zeros(1, N_ITER);
         for ii = 1:N_ITER
             sample_mask1 = randsample(length(tumor_test), M1);
@@ -86,7 +110,17 @@ for M1 = 12:2:20
             P(ii) = tcdf(T, nu, 'upper');
         end
 
-        res_mat(M0, M1) = 1 - sum(P < alpha / 2) / N_ITER;
+        res_mat(i_M0, i_M1) = 1 - sum(P < alpha) / N_ITER;
     end
 end
 
+csvwrite('cancer_sim.csv', res_mat)
+csvwrite('cancer_sensei.csv', res_mat0)
+csvwrite('cancer_baseline.csv', res_mat1)
+
+ksdensity(tumor)
+hold on
+ksdensity(juxta)
+legend('Tumor', 'Juxta', 'title', 'Group')
+xlabel('Abundance')
+ylabel('Probability Density')

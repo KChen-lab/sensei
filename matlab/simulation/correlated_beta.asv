@@ -1,6 +1,0 @@
-clear
-
-function res = rndd(a)
-    res = gamrnd(a, 1);
-    res = res / sum(res);
-end

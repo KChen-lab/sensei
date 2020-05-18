@@ -72,10 +72,11 @@ for M1 = 12:2:20
         Et_upper = - (Ep(2) - (Ep(1) + upper)) / sqrt(sum(Vp ./ M));
         t_star = tinv(1 - alpha, nu);
 
-        res_mat0(M0, M1) = min([1, normcdf(t_star - Et_lower) + normcdf(t_star - Et_upper)]);
-
-        rng(0);
-        N_ITER = 1000;
+        % res_mat0(M0, M1) = min([1, normcdf(t_star - Et_lower) + normcdf(t_star - Et_upper)]);
+        res_mat0(M0, M1) = min([1, tcdf(t_star - Et_lower, nu) + tcdf(t_star - Et_upper, nu)]);
+        
+        rng(2020);
+        N_ITER = 10000;
         P_lower = zeros(1, N_ITER);
         P_upper = zeros(1, N_ITER);
         

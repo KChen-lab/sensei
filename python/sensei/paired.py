@@ -48,7 +48,7 @@ def calc_fn_rate_beta(M, N, a, b, rho, alpha=0.05, test_type="one-sided", offset
         t_star = scipy.stats.t.ppf(q=1 - alpha / 2, df=nu)
     else:
         raise ValueError("test must be one-sided or two-sided")
-    return scipy.stats.norm.cdf(t_star - Et, loc=0, scale=1)
+    return scipy.stats.t.cdf(t_star - Et, df=nu)
 
 
 def calc_fn_rate(M, N, m, s, rho, alpha, test_type, offset, sign):
@@ -133,7 +133,7 @@ def calc_fn_rate_override(M, N, m, s, rho, alpha, test_type, override_diff):
         t_star = scipy.stats.t.ppf(q=1 - alpha / 2, df=nu)
     else:
         raise ValueError("test must be one-sided or two-sided")
-    return scipy.stats.norm.cdf(t_star - Et, loc=0, scale=1)
+    return scipy.stats.t.cdf(t_star - Et, df=nu)
 
 
 def calc_fn_rate_baseline(M, m, s, rho, alpha, test_type, offset, sign):
@@ -181,4 +181,4 @@ def calc_fn_rate_baseline(M, m, s, rho, alpha, test_type, offset, sign):
         t_star = scipy.stats.t.ppf(q=1 - alpha / 2, df=nu)
     else:
         raise ValueError("test must be one-sided or two-sided")
-    return scipy.stats.norm.cdf(t_star - Et, loc=0, scale=1)
+    return scipy.stats.t.cdf(t_star - Et, df=nu)

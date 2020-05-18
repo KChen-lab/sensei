@@ -191,7 +191,8 @@
 
             console.log("unpaired", M0, M1, Et);
 
-            return jStat.normal.cdf(t_star - Et, 0, 1)
+            // return jStat.normal.cdf(t_star - Et, 0, 1)
+            return jStat.studentt.cdf(t_star - Et, nu)
         }
 
         function round(x, p) {return Math.round(x * Math.pow(10, p)) / Math.pow(10, p)}
@@ -309,7 +310,8 @@
 
             console.log("paired", M, Et);
 
-            return jStat.normal.cdf(t_star - Et, 0, 1)
+            // return jStat.normal.cdf(t_star - Et, 0, 1)
+            return jStat.studentt.cdf(t_star - Et, nu)
         }
 
         function execCalcBetaPaired()

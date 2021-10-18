@@ -4,7 +4,7 @@ rng(0);
 M1_list = 5:12;
 M2_list = 5:12;
 
-ITER = 10000;
+ITER = 1000;
 alpha = 0.05;
 
 %% parameters for 1
@@ -33,6 +33,8 @@ mat = zeros(length(M1_list), length(M2_list));
 mat2 = zeros(length(M1_list), length(M2_list));
 res = zeros(ITER, 1);
 
+
+%% Prediction
 for kk = 1:length(M1_list)
     for jj = 1:length(M2_list)
         a = [a2 a1];
@@ -52,6 +54,8 @@ for kk = 1:length(M1_list)
     end
 end
 
+
+%% Simulation
 for kk = 1:length(M1_list)
     for jj = 1:length(M2_list)
         M1 = M1_list(kk);

@@ -94,8 +94,8 @@ for i_M0 = 1 : length(M_list)
         N_ITER = 5000;
         P = zeros(1, N_ITER);
         for ii = 1:N_ITER
-            sample_mask1 = randsample(length(tumor_test), M1);
-            sample_mask0 = randsample(length(juxta_test), M0);
+            sample_mask1 = randsample(length(tumor_test), M1, true);
+            sample_mask0 = randsample(length(juxta_test), M0, true);
             p1 = binornd(N1, tumor_test(sample_mask1)) / N1;
             p0 = binornd(N0, juxta_test(sample_mask0)) / N0;
 
@@ -106,7 +106,7 @@ for i_M0 = 1 : length(M_list)
 
             nu = (s0 / M0 + s1 / M1) .^ 2 ./ ((s0 / M0) .^ 2 / (M0 - 1) + (s1 / M1) .^ 2 / (M1 - 1));
 
-            T = abs(m1 - m0) ./ sqrt(s1 / M1 + s0 / M0);
+            T = (m1 - m0) ./ sqrt(s1 / M1 + s0 / M0);
             P(ii) = tcdf(T, nu, 'upper');
         end
 
@@ -121,6 +121,9 @@ csvwrite('cancer_baseline.csv', res_mat1)
 ksdensity(tumor)
 hold on
 ksdensity(juxta)
-legend('Tumor', 'Juxta', 'title', 'Group')
+legend('Tumor', 'Juxta')
 xlabel('Abundance')
 ylabel('Probability Density')
+
+mean(mean((abs(res_mat - res_mat0) ./ res_mat)))
+mean(mean((abs(res_mat - res_mat1) ./ res_mat)))

@@ -129,6 +129,46 @@
             cursor: help;
             border-bottom: 1px dashed #73AD21;
         }
+
+    /* collapsible */
+    .collapsible {
+        background-color: #eee;
+        border: 1px dashed #aaa;
+        border-bottom-style: none;
+        color: black;
+        cursor: pointer;
+        padding: 12px 10px 12px 3px;
+        width: 100%;
+        text-align: left;
+        outline: none;
+    }
+
+    .active, .collapsible:hover {
+        border-color: #aaa;
+    }
+
+    .collapsible:after {
+        font-size: 15px;
+        content: '\002B';
+        color: black;
+        font-weight: bold;
+        float: right;
+        margin-left: 5px;
+    }
+
+    .active:after {
+        content: "\2212";
+    }
+
+    .content {
+        padding: 0px 10px 0px 3px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+        background-color: #fafafa;
+        border: 1px dashed #aaa;
+        border-top: none;
+    }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
     <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
@@ -645,17 +685,16 @@
             <div class="column30">
                 <h2>Control group</h2>
                 <div class="block">
-                    <label for="">Range of samples M<sub>0</sub></label>
+                    <label for=""><a class="glossaryLink" title="Number of patients you plan to recruit">Range of samples M<sub>0</sub></a></label>
                     <input type="number" id="M0_min" value="" style="width: 45px;">
                     ~
                     <input type="number" id="M0_max" value="" style="width: 45px;">
                 </div>
                 <div class="block">
-                    <label for="N0">Number of cells N<sub>0</sub></label>
+                    <label for="N0"><a class="glossaryLink" title="Number of cells in each sample. Reasonable numbers are: &#10;Smart-seq: 100~300 &#10;10x Chromium: 3,000~5,000 &#10;CyTOF: 3 × 10⁶">Number of cells N<sub>0</sub></a></label>
                     <input type="number" id="N0" value="" step=100>
                 </div>
-                <h3>Beta distribution</h3>
-                <h4><b>Specify</b> Mean and variance</h4>
+                <h4><a class="glossaryLink" title="If you have a pilot study, these can be set to the mean and standard deviation of the cell type abundance.&#10;Otherwise, these are some reasonable values for PBMCs (mean ± std):&#10;CD4 T cells: 40% ± 5%&#10;CD8 T cells: 20% ± 5%&#10;B cells: 10% ± 5%&#10;NK cells: 20 ± 3%&#10;Monocytes: 8 ± 2%&#10;Dendritic cells: 1.5% ± 0.2%">Expected cell abundance</a></h4>
                 <div class="block">
                     <label for="mean0">Mean</label>
                     <input type="number" id="mean0" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam(0); plotBeta();">
@@ -664,14 +703,21 @@
                     <label for="">Standard deviation</label>
                     <input type="number" id="std0" value="" step="0.01" min="0.001" onchange="execBetaStatParam(0); plotBeta();">
                 </div>
-                <h4><b>or</b> a<sub>0</sub> and b<sub>0</sub></h4>
-                <div class="block">
-                    Beta(a<sub>0</sub> = 
-                    <input type="number" id="a0" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(0); plotBeta();">
-                    , b<sub>0</sub> = 
-                    <input type="number" id="b0" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(0); plotBeta();">
-                    )
+                <button class="collapsible">Or a<sub>0</sub> and b<sub>0</sub> for the underlying <a class="glossaryLink" title="We assume that the cell abundance follow a beta distribution, a distribution commonly used for modeling proportions. It is not far from a normal distribution in most cases.">beta distribution</a></button>
+                <div class="content">
+                    <div class="block">
+                        Beta(a<sub>0</sub> = 
+                        <input type="number" id="a0" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(0); plotBeta();">
+                        , b<sub>0</sub> = 
+                        <input type="number" id="b0" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(0); plotBeta();">
+                        )
+                        <p><small>The mean and standard deviation will change when you change a<sub>0</sub> and b<sub>0</sub>, 
+                            and vice versa.</small></p>
+                    </div>
                 </div>
+
+                <h4></h4>
+                
             </div>
 
             <div class="column30">
@@ -684,8 +730,7 @@
                     <label for="N1">Number of cells N<sub>1</sub></label>
                     <input type="number" id="N1" value="" step=100>
                 </div>
-                <h3>Beta distribution</h3>
-                <h4><b>Specify</b> Mean and variance</h4>
+                <h4>Expected cell abundance</h4>
                 <div class="block">
                     <label for="mean1">Mean</label>
                     <input type="number" id="mean1" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam(1); plotBeta();">
@@ -694,20 +739,24 @@
                     <label for="">Standard deviation</label>
                     <input type="number" id="std1" value="" step="0.01" min="0.001" onchange="execBetaStatParam(1); plotBeta();">
                 </div>
-                <h4><b>or</b> a<sub>1</sub> and b<sub>1</sub></h4>
-                <div class="block">
-                    Beta(a<sub>1</sub> = 
-                    <input type="number" id="a1" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(1); plotBeta();">
-                    , b<sub>1</sub> = 
-                    <input type="number" id="b1" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(1); plotBeta();">
-                    )
+                <button class="collapsible">Or a<sub>0</sub> and b<sub>0</sub> for the underlying beta distribution</button>
+                <div class="content">
+                    <div class="block">
+                        Beta(a<sub>0</sub> = 
+                        <input type="number" id="a1" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(1); plotBeta();">
+                        , b<sub>0</sub> = 
+                        <input type="number" id="b1" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat(1); plotBeta();">
+                        )
+                        <p><small>The mean and standard deviation will change when you change a<sub>0</sub> and b<sub>0</sub>, 
+                            and vice versa.</small></p>
+                    </div>
                 </div>
             </div>
 
             <div class="column40">
                 <h2>Visualize Beta-distributions</h2>
                 <div id='plot'><!-- Plotly chart will be drawn inside this DIV --></div>
-                <div>The graph will update when the Beta-distributions change.</div>
+                <div><small>The graph will update when the Beta-distributions change.</small></div>
             </div>
 
         </div>
@@ -718,30 +767,30 @@
                 <h2>Statistical Test</h2>
                 <div>
                     <div class="block">
-                        <label for="alpha">False positive rate α</label>
+                        <label for="alpha"><a class="glossaryLink" title="The significance level to be used in your study, usuall 0.01 or 0.05.">False positive rate</a> α</label>
                         <input type="number" id="alpha" value="" step=0.01>
                     </div>
                     <div class="block">
-                        <label for="beta">False negative threshold β<sub>th</sub></label>
+                        <label for="beta"><a class="glossaryLink" title="The chance of getting a false negative result in your study.">False negative threshold</a> β<sub>th</sub></label>
                         <input type="number" id="beta" value="" step=0.01>
                     </div>
                     <div>
                         <h3>Type</h3>
                         <div>
                             <input type="radio" id="one_sided" name="test_type" value="one_sided" onchange="displayParams();" checked>
-                            <label class="radio" for="one_sided">One-sided t-test</label>
+                            <label class="radio" for="one_sided"><a class="glossaryLink" title="Useful when prior knowledge supports a direction of change, and only that direction is tested for.">One-sided</a> t-test</label>
                         </div>
                         <div>
                             <input type="radio" id="two_sided" name="test_type" value="two_sided" onchange="displayParams();">
-                            <label class="radio" for="two_sided">Two-sided t-test</label>
+                            <label class="radio" for="two_sided"><a class="glossaryLink" title="Useful when you only want to know if the two samples are different, but do not know which way it will go.">Two-sided t-test</a></label>
                         </div>
                         <div>
                             <input type="radio" id="sesoi_test" name="test_type" value="sesoi_test" onchange="displayParams();">
-                            <label class="radio" for="sesoi_test">t-Test with <a class="glossaryLink" title="SESOI: smallest effect size of interest">SESOI</a></label>
+                            <label class="radio" for="sesoi_test">t-Test with <a class="glossaryLink" title="SESOI: smallest effect size of interest.&#010;Useful when you want to test for an effect with a difference other than 0.&#010;E.g., a drug is considered effective if the number of T cells raise by at least 1 percent points.">SESOI</a></label>
                         </div>
                         <div>
                             <input type="radio" id="tost_test" name="test_type" value="sesoi_test" onchange="displayParams();">
-                            <label class="radio" for="tost_test"><a class="glossaryLink" title="TOST: two one-sided t-tests">TOST</a> for equivalence</label>
+                            <label class="radio" for="tost_test"><a class="glossaryLink" title="TOST: two one-sided t-tests.&#010;Useful when you want to test if two samples has effectively the same value by asserting that the change is no larger than a percentage.">TOST</a> for equivalence</label>
                         </div>
                         <div id="sesoi_param">
                             <h3>Parameters for SESOI</h3>
@@ -782,8 +831,8 @@
                         Results pending calculating...
                     </div>
                 </div>
-                <div>False negative rates. Lower is better. Each row correponds to a fixed number of control samples.
-                     Each row correponds to a fixed number of experimental samples. Values pass β<sub>th</sub> are colored in gray.
+                <div><small>Lower is better. Each row correponds to a fixed number of control samples.
+                    Each row correponds to a fixed number of experimental samples. Values pass β<sub>th</sub> are shaded.</small>
                 </div>
             </div>
         </div>
@@ -815,8 +864,7 @@
                             <label for="N0_paired">Number of cells N<sub>0</sub></label>
                             <input type="number" id="N0_paired" value="" step=100>
                         </div>
-                        <h3>Beta distribution</h3>
-                        <h4><b>Specify</b> Mean and variance</h4>
+                        <h4>Expected cell abundance</h4>
                         <div class="block">
                             <label for="mean0_paired">Mean</label>
                             <input type="number" id="mean0_paired" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam('0_paired');">
@@ -825,13 +873,15 @@
                             <label for="std0_paired">Standard deviation</label>
                             <input type="number" id="std0_paired" value="" step="0.01" min="0.001" onchange="execBetaStatParam('0_paired');">
                         </div>
-                        <h4><b>or</b> a<sub>0</sub> and b<sub>0</sub></h4>
-                        <div class="block">
-                            Beta(a<sub>0</sub> = 
-                            <input type="number" id="a0_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('0_paired');">
-                            , b<sub>0</sub> = 
-                            <input type="number" id="b0_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('0_paired');">
-                            )
+                        <button class="collapsible">Or a<sub>0</sub> and b<sub>0</sub> for the underlying <a class="glossaryLink" title="We assume that the cell abundance follow a beta distribution, a distribution commonly used for modeling proportions. It is not far from a normal distribution in most cases.">beta distribution</a></button>
+                        <div class="content">
+                            <div class="block">
+                                Beta(a<sub>0</sub> = 
+                                <input type="number" id="a0_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('0_paired');">
+                                , b<sub>0</sub> = 
+                                <input type="number" id="b0_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('0_paired');">
+                                )
+                            </div>
                         </div>
                     </div>
         
@@ -841,8 +891,7 @@
                             <label for="N1_paired">Number of cells N<sub>1</sub></label>
                             <input type="number" id="N1_paired" value="" step=100>
                         </div>
-                        <h3>Beta distribution</h3>
-                        <h4><b>Specify</b> Mean and variance</h4>
+                        <h4>Expected cell abundance</h4>
                         <div class="block">
                             <label for="mean1_paired">Mean</label>
                             <input type="number" id="mean1_paired" value="" step="0.05" min="0.05"  max="0.95" onchange="execBetaStatParam('1_paired');">
@@ -851,13 +900,15 @@
                             <label for="std1_paired">Standard deviation</label>
                             <input type="number" id="std1_paired" value="" step="0.01" min="0.001" onchange="execBetaStatParam('1_paired');">
                         </div>
-                        <h4><b>or</b> a<sub>1</sub> and b<sub>1</sub></h4>
-                        <div class="block">
-                            Beta(a<sub>1</sub> = 
-                            <input type="number" id="a1_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('1_paired');">
-                            , b<sub>1</sub> = 
-                            <input type="number" id="b1_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('1_paired');">
-                            )
+                        <button class="collapsible">Or a<sub>0</sub> and b<sub>0</sub> for the underlying <a class="glossaryLink" title="We assume that the cell abundance follow a beta distribution, a distribution commonly used for modeling proportions. It is not far from a normal distribution in most cases.">beta distribution</a></button>
+                        <div class="content">
+                            <div class="block">
+                                Beta(a<sub>1</sub> = 
+                                <input type="number" id="a1_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('1_paired');">
+                                , b<sub>1</sub> = 
+                                <input type="number" id="b1_paired" value="" step="1" min="1" style="width: 70px" onchange="execBetaParamStat('1_paired');">
+                                )
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -867,7 +918,7 @@
             <div class="column40">
                 <h2>Visualization</h2>
                 <div id='plot_paired'><!-- Plotly chart will be drawn inside this DIV --></div>
-                <div>The graph will update when the Beta-distributions change.</div>
+                <div><small>The graph will update when the Beta-distributions change.</small></div>
             </div>
         </div>
         
@@ -877,11 +928,11 @@
                 <h2>Statistical Test</h2>
                 <div>
                     <div class="block">
-                        <label for="alpha_paired">False positive rate α</label>
+                        <label for="alpha_paired"><a class="glossaryLink" title="The significance level to be used in your study, usuall 0.01 or 0.05.">False positive rate</a> α</label>
                         <input type="number" id="alpha_paired" value="" step=0.01>
                     </div>
                     <div class="block">
-                        <label for="beta_paired">False negative threshold β<sub>th</sub></label>
+                        <label for="beta_paired"><a class="glossaryLink" title="The chance of getting a false negative result in your study.">False negative threshold</a> β<sub>th</sub></label>
                         <input type="number" id="beta_paired" value="" step=0.01>
                     </div>
                     <div>
@@ -941,8 +992,8 @@
                         Results pending calculating...
                     </div>
                 </div>
-                <div>False negative rates. Lower is better. Each row correponds to a fixed number of control samples.
-                     Each row correponds to a fixed number of experimental samples. Values pass β<sub>th</sub> are colored in gray.
+                <div><small>Lower is better. Each row correponds to a fixed number of control samples.
+                     Each row correponds to a fixed number of experimental samples. Values pass β<sub>th</sub> are shaded.</small>
                 </div>
             </div>
         </div>
@@ -1009,6 +1060,21 @@
 </body>
 
 <script>
+    var coll = document.getElementsByClassName("collapsible");
+    var coli;
+
+    for (coli = 0; coli < coll.length; coli++) {
+    coll[coli].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.maxHeight){
+        content.style.maxHeight = null;
+        } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+        } 
+    });
+    }
+
     function openPage(pageName, elmnt, color) {
         // Hide all elements with class="tabcontent" by default */
         var i, tabcontent, tablinks;

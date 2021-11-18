@@ -1004,16 +1004,21 @@
         <div class="row">
             <div class="column">
                 <h2>Instructions</h2>
+                The overall workflow is as follows. You can refer to the hover-over help information for definition of the parameters and commonly used values.
                 <ol>
-                    <li>For unpaired test, set range of M<sub>0</sub> and M<sub>1</sub>, i.e., the numbers of samples in control group and experimental group, respectively. 
-                        For paired test, set range of M and correlation between two samples.</li>
-                    <li>Set N<sub>0</sub> and N<sub>1</sub> for number of cells in each sample for each group. (Total number of cells = M<sub>0</sub>N<sub>0</sub> + M<sub>1</sub>N<sub>1</sub>) </li>
-                    <li>Set mean and standard deviation for proportion of a cell type. This corresponds to variances among samples in a group. <b>Alternatively</b>, set a and b for each beta distribution.</li>
+                    <li>Set the numbers of samples in control group and experimental group, M<sub>0</sub> and M<sub>1</sub>. 
+                        For paired test, there is only one M.</li>
+                    <li>Set mber of cells N<sub>0</sub> and N<sub>1</sub> in each sample.</li>
+                    <li>Set mean and standard deviation for proportion of a cell type. You can use the plot to view the distribution to confirm your choice.</li>
+                    <li>Read from the output table. The shaded ones are the ones with high power.</li>
+                </ol>
+                Some other paramters as follows can also be changed.
+                <ui>
+                    <li>Set a and b for the underlying beta distribution for cell abundance, in lieu of mean and standard deviation.</li>
                     <li>Set α, it is the threshold for a significant p-value. 0.05 and 0.01 are commonly used.</li>
                     <li>Set threshold β<sub>th</sub> for preferred false negative rate. It is the probability of failing to yield a siginificant result.</li>
                     <li>Choose from one-sided test and two-sided test.</li>
-                </ol>
-                The table will automatically refresh when a value is changed.
+                </ui>
             </div>
         </div>
         <div class="row">

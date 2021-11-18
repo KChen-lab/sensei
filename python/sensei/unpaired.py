@@ -1,19 +1,44 @@
 import scipy.stats
 from .utils import *
+from scipy.stats import mannwhitneyu, ttest_ind, betabinom
+
+def calc_wilcoxon_fn(M, N, m, s, alpha = 0.05, n_sim = 10_000):
+    """
+    
+    :param M: number of patients, as a list
+    :param N: number of cells, as a list
+    :param m: mean for both groups, as a list
+    :param s: std for both groups, as a list
+    :param alpha: significance level
+    :param n_sim: simulation iterations
+    :return: false negative rate, i.e., 1 - power
+    """
+    N0, N1 = N
+    M0, M1 = M
+    m0, m1 = m
+    s0, s1 = s
+    
+    a0, b0 = normal_to_beta(m0, s0)
+    r0 = betabinom.rvs(N0, a0, b0, size=(M0, n_sim)) / n
+
+    a1, b1 = normal_to_beta(m1, s1)
+    r1 = betabinom.rvs(N1, a1, b1, size=(M1, n_sim)) / n
+    
+    return 1 - sum(mannwhitneyu(r0, r1).pvalue < alpha) / n_sim
 
 
 def calc_fn_rate_beta(M, N, a, b, alpha=0.05, test_type="one-sided", offset=0, sign=0):
     """
-
-    :param M:
-    :param N:
-    :param a:
-    :param b:
-    :param alpha:
-    :param test_type:
+    Calculate false negative rate
+    :param M: number of patients
+    :param N: number of cells
+    :param a: Beta(a, b)
+    :param b: Beta(a, b)
+    :param alpha: significance level
+    :param test_type: one-sided or two-sided
     :param offset:
     :param sign:
-    :return:
+    :return: false negative rate, i.e., 1 - power
     """
 
     if not is_iterable(M):

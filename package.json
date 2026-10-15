@@ -1,0 +1,12 @@
+{
+  "name": "sensei-web",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Static, browser-only Sensei calculator",
+  "devDependencies": { "playwright": "1.62.1" },
+  "scripts": {
+    "start": "node scripts/serve.cjs",
+    "test": "node --test tests/core.test.cjs",
+    "test:browser": "node tests/browser.test.cjs"
+  }
+}
